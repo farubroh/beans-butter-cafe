@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Beans & Butter Cafe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --cream: #FDF6EC;
+            --brown-dark: #2C1810;
+            --brown: #6F4E37;
+            --brown-light: #A0785A;
+            --amber: #D4861A;
+            --amber-light: #F5A623;
+            --green: #2E7D50;
+            --red: #C0392B;
+            --white: #FFFFFF;
+            --gray-50: #FAFAF8;
+            --gray-100: #F0EBE3;
+            --gray-200: #DDD5C8;
+            --gray-400: #9E8E7E;
+            --gray-600: #5C4E3E;
+            --shadow-sm: 0 1px 3px rgba(44,24,16,0.08);
+            --shadow: 0 4px 16px rgba(44,24,16,0.12);
+            --shadow-lg: 0 8px 32px rgba(44,24,16,0.18);
+            --radius: 12px;
+            --radius-lg: 20px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--brown-dark); min-height: 100vh; }
+
+        /* ── LOGIN ── */
+        #login-screen {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #2C1810 0%, #6F4E37 50%, #A0785A 100%);
+            padding: 20px;
+        }
+        .login-card {
+            background: var(--white); border-radius: var(--radius-lg); padding: 48px 40px;
+            width: 100%; max-width: 420px; box-shadow: var(--shadow-lg);
+        }
+        .login-logo { text-align: center; margin-bottom: 32px; }
+        .login-logo h1 { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--brown-dark); }
+        .login-logo p { color: var(--brown-light); font-size: 14px; margin-top: 4px; letter-spacing: 2px; text-transform: uppercase; }
+        .login-logo .icon { font-size: 48px; margin-bottom: 12px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--brown); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 12px 16px; border: 2px solid var(--gray-200);
+            border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 15px;
+            color: var(--brown-dark); background: var(--gray-50); transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--amber); background: var(--white);
+        }
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 12px 24px; border-radius: var(--radius); border: none; cursor: pointer;
+            font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; transition: all 0.2s;
+        }
+        .btn-primary { background: var(--brown-dark); color: var(--white); width: 100%; padding: 14px; }
+        .btn-primary:hover { background: var(--brown); transform: translateY(-1px); box-shadow: var(--shadow); }
+        .btn-amber { background: var(--amber); color: var(--white); }
+        .btn-amber:hover { background: var(--amber-light); }
+        .btn-green { background: var(--green); color: var(--white); }
+        .btn-green:hover { opacity: 0.9; }
+        .btn-red { background: var(--red); color: var(--white); }
+        .btn-red:hover { opacity: 0.9; }
+        .btn-outline { background: transparent; border: 2px solid var(--gray-200); color: var(--brown); }
+        .btn-outline:hover { border-color: var(--brown); }
+        .btn-sm { padding: 7px 14px; font-size: 13px; }
+        .btn-xs { padding: 4px 10px; font-size: 12px; border-radius: 8px; }
+        .error-msg { color: var(--red); font-size: 13px; margin-top: 8px; text-align: center; }
+
+        /* ── APP SHELL ── */
+        #app { display: none; min-height: 100vh; }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            background: var(--brown-dark); color: var(--white); padding: 0 24px;
+            height: 60px; display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow);
+        }
+        .topbar-brand { font-family: 'Playfair Display', serif; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+        .topbar-right { display: flex; align-items: center; gap: 16px; }
+        .user-badge { background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-size: 13px; }
+        .role-badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .role-owner { background: var(--amber); color: var(--white); }
+        .role-manager { background: var(--green); color: var(--white); }
+        .btn-logout { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: var(--white); padding: 7px 14px; border-radius: var(--radius); cursor: pointer; font-size: 13px; font-family: 'DM Sans', sans-serif; }
+        .btn-logout:hover { background: rgba(255,255,255,0.2); }
+
+        /* ── NAV TABS ── */
+        .nav-tabs {
+            background: var(--white); border-bottom: 2px solid var(--gray-100);
+            padding: 0 24px; display: flex; gap: 4px; overflow-x: auto;
+        }
+        .nav-tab {
+            padding: 14px 20px; cursor: pointer; font-size: 14px; font-weight: 500;
+            color: var(--gray-400); border-bottom: 3px solid transparent; white-space: nowrap;
+            transition: all 0.2s; margin-bottom: -2px; display: flex; align-items: center; gap: 8px;
+        }
+        .nav-tab:hover { color: var(--brown); }
+        .nav-tab.active { color: var(--brown-dark); border-bottom-color: var(--amber); font-weight: 600; }
+        .tab-icon { font-size: 16px; }
+
+        /* ── PAGE ── */
+        .page { display: none; padding: 24px; max-width: 1400px; margin: 0 auto; }
+        .page.active { display: block; }
+
+        /* ── CARDS ── */
+        .card { background: var(--white); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-100); }
+        .card-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--brown-dark); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+        /* ── STAT CARDS ── */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: var(--white); border-radius: var(--radius-lg); padding: 20px 24px; border: 1px solid var(--gray-100); box-shadow: var(--shadow-sm); }
+        .stat-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-400); margin-bottom: 8px; }
+        .stat-value { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--brown-dark); }
+        .stat-value.green { color: var(--green); }
+        .stat-value.red { color: var(--red); }
+        .stat-value.amber { color: var(--amber); }
+        .stat-sub { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+
+        /* ── ORDER SCREEN ── */
+        .order-layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+        @media(max-width:900px){ .order-layout { grid-template-columns: 1fr; } }
+
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+        .product-card {
+            background: var(--white); border: 2px solid var(--gray-100); border-radius: var(--radius);
+            padding: 16px; cursor: pointer; text-align: center; transition: all 0.2s;
+        }
+        .product-card:hover { border-color: var(--amber); transform: translateY(-2px); box-shadow: var(--shadow); }
+        .product-card:active { transform: translateY(0); }
+        .product-emoji { font-size: 28px; margin-bottom: 8px; }
+        .product-name { font-size: 13px; font-weight: 600; color: var(--brown-dark); margin-bottom: 4px; }
+        .product-price { font-size: 15px; font-weight: 700; color: var(--amber); }
+        .cat-filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .cat-btn {
+            padding: 7px 16px; border-radius: 20px; border: 2px solid var(--gray-200);
+            background: var(--white); cursor: pointer; font-size: 13px; font-weight: 500;
+            color: var(--brown); transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+        }
+        .cat-btn:hover, .cat-btn.active { background: var(--brown-dark); color: var(--white); border-color: var(--brown-dark); }
+
+        /* ── CART ── */
+        .cart-panel { background: var(--white); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-100); height: fit-content; position: sticky; top: 80px; }
+        .cart-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--brown-dark); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .cart-items { max-height: 320px; overflow-y: auto; margin-bottom: 16px; }
+        .cart-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
+        .cart-item-name { flex: 1; font-size: 14px; font-weight: 500; }
+        .cart-item-price { font-size: 13px; color: var(--gray-400); }
+        .qty-ctrl { display: flex; align-items: center; gap: 6px; }
+        .qty-btn { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--gray-200); background: var(--white); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--brown); transition: all 0.15s; }
+        .qty-btn:hover { border-color: var(--amber); color: var(--amber); }
+        .qty-num { width: 24px; text-align: center; font-weight: 700; font-size: 15px; }
+        .cart-empty { text-align: center; color: var(--gray-400); padding: 32px 0; font-size: 14px; }
+
+        .cart-summary { border-top: 2px solid var(--gray-100); padding-top: 14px; }
+        .summary-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
+        .summary-total { display: flex; justify-content: space-between; font-size: 18px; font-weight: 700; color: var(--brown-dark); padding-top: 10px; border-top: 2px solid var(--brown-dark); margin-top: 8px; }
+
+        .discount-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .payment-row { display: flex; gap: 8px; margin-bottom: 14px; }
+        .pay-btn { flex: 1; padding: 8px; border-radius: var(--radius); border: 2px solid var(--gray-200); background: var(--white); cursor: pointer; font-size: 13px; font-weight: 500; color: var(--brown); transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+        .pay-btn.active { background: var(--brown-dark); color: var(--white); border-color: var(--brown-dark); }
+
+        /* ── RECEIPT MODAL ── */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(44,24,16,0.6); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--white); border-radius: var(--radius-lg); width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; }
+        .modal-body { padding: 24px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--gray-100); display: flex; gap: 10px; }
+        .close-btn { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray-400); }
+
+        /* ── RECEIPT ── */
+        .receipt { font-family: 'DM Sans', sans-serif; }
+        .receipt-header { text-align: center; padding-bottom: 16px; border-bottom: 2px dashed var(--gray-200); margin-bottom: 16px; }
+        .receipt-header h2 { font-family: 'Playfair Display', serif; font-size: 22px; }
+        .receipt-header p { font-size: 12px; color: var(--gray-400); }
+        .receipt-item { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+        .receipt-divider { border: none; border-top: 1px dashed var(--gray-200); margin: 12px 0; }
+        .receipt-total { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; }
+        .receipt-thanks { text-align: center; font-size: 12px; color: var(--gray-400); margin-top: 16px; }
+
+        /* ── TABLES ── */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { padding: 12px 16px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; color: var(--gray-400); border-bottom: 2px solid var(--gray-100); }
+        .data-table td { padding: 12px 16px; border-bottom: 1px solid var(--gray-100); font-size: 14px; }
+        .data-table tr:hover td { background: var(--gray-50); }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge-green { background: #E8F5EE; color: var(--green); }
+        .badge-amber { background: #FFF3E0; color: var(--amber); }
+        .badge-red { background: #FDECEA; color: var(--red); }
+
+        /* ── GRID HELPERS ── */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+        @media(max-width:600px){ .grid-2 { grid-template-columns: 1fr; } }
+
+        /* ── CHART ── */
+        .chart-bar-wrap { display: flex; flex-direction: column; gap: 6px; }
+        .chart-bar-row { display: flex; align-items: center; gap: 10px; }
+        .chart-bar-label { width: 80px; font-size: 12px; color: var(--gray-400); text-align: right; flex-shrink: 0; }
+        .chart-bar-track { flex: 1; height: 20px; background: var(--gray-100); border-radius: 10px; overflow: hidden; }
+        .chart-bar-fill { height: 100%; border-radius: 10px; transition: width 0.6s ease; }
+        .chart-bar-val { width: 80px; font-size: 12px; font-weight: 600; color: var(--brown-dark); }
+
+        .line-chart-wrap { position: relative; width: 100%; overflow-x: auto; }
+
+        /* ── EMPTY / LOADING ── */
+        .loading { text-align: center; padding: 40px; color: var(--gray-400); }
+        .empty-state { text-align: center; padding: 48px 20px; color: var(--gray-400); }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+        /* ── COLOR DOT ── */
+        .color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+
+        /* ── TOAST ── */
+        #toast {
+            position: fixed; bottom: 24px; right: 24px; background: var(--brown-dark); color: var(--white);
+            padding: 12px 24px; border-radius: var(--radius); font-size: 14px; box-shadow: var(--shadow-lg);
+            z-index: 9999; transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: none;
+        }
+        #toast.show { transform: translateY(0); opacity: 1; }
+        #toast.success { background: var(--green); }
+        #toast.error { background: var(--red); }
+
+        /* ── PRINT ── */
+        @media print {
+            body > *:not(#print-area) { display: none !important; }
+            #print-area { display: block !important; }
+        }
+        #print-area { display: none; }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--gray-100); }
+        ::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="icon">☕</div>
+            <h1>Beans & Butter</h1>
+            <p>Cafe Management</p>
+        </div>
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="login-username" placeholder="Enter username" autocomplete="off"/>
+        </div>
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="Enter password"/>
+        </div>
+        <div id="login-error" class="error-msg"></div>
+        <button class="btn btn-primary" style="margin-top:8px" onclick="doLogin()">Sign In →</button>
+        <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:16px">
+            Owner: owner / owner123 &nbsp;|&nbsp; Manager: manager / manager123
+        </p>
+    </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+    <div class="topbar">
+        <div class="topbar-brand">☕ Beans & Butter</div>
+        <div class="topbar-right">
+            <span class="user-badge" id="user-info">–</span>
+            <span class="role-badge" id="role-badge">–</span>
+            <button class="btn-logout" onclick="doLogout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="nav-tabs" id="nav-tabs">
+        <div class="nav-tab active" data-page="order"><span class="tab-icon">🛒</span>New Order</div>
+        <div class="nav-tab" data-page="orders-list"><span class="tab-icon">📋</span>Orders</div>
+        <div class="nav-tab" data-page="costs"><span class="tab-icon">💸</span>Daily Costs</div>
+        <div class="nav-tab" data-page="products"><span class="tab-icon">🍽️</span>Products</div>
+        <div class="nav-tab" data-page="categories"><span class="tab-icon">🏷️</span>Categories</div>
+        <div class="nav-tab owner-only" data-page="dashboard" style="display:none"><span class="tab-icon">📊</span>Dashboard</div>
+    </div>
+
+    <!-- ORDER PAGE -->
+    <div class="page active" id="page-order">
+        <div class="order-layout">
+            <div>
+                <div class="cat-filter" id="cat-filter"></div>
+                <div class="products-grid" id="products-grid">
+                    <div class="loading">Loading products...</div>
+                </div>
+            </div>
+            <div class="cart-panel">
+                <div class="cart-title">
+                    Order <button class="btn btn-outline btn-xs" onclick="clearCart()">Clear</button>
+                </div>
+                <div class="cart-items" id="cart-items">
+                    <div class="cart-empty">☕ Add items to order</div>
+                </div>
+                <div class="cart-summary" id="cart-summary" style="display:none">
+                    <div class="summary-row"><span>Subtotal</span><span id="s-subtotal">৳0</span></div>
+                    <div class="discount-row">
+                        <select class="form-group" id="discount-type" style="padding:8px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;width:100%" onchange="recalcTotal()">
+                            <option value="none">No Discount</option>
+                            <option value="percent">% Discount</option>
+                            <option value="flat">Flat (৳)</option>
+                        </select>
+                        <input type="number" id="discount-val" placeholder="Value" min="0" style="padding:8px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;width:100%" oninput="recalcTotal()"/>
+                    </div>
+                    <div class="summary-row" id="discount-row" style="display:none;color:var(--red)">
+                        <span>Discount</span><span id="s-discount">-৳0</span>
+                    </div>
+                    <div class="summary-total"><span>TOTAL</span><span id="s-total">৳0</span></div>
+                    <div class="payment-row" style="margin-top:12px">
+                        <button class="pay-btn active" id="pay-cash" onclick="setPayment('cash')">💵 Cash</button>
+                        <button class="pay-btn" id="pay-card" onclick="setPayment('card')">💳 Card</button>
+                        <button class="pay-btn" id="pay-mobile" onclick="setPayment('mobile')">📱 Mobile</button>
+                    </div>
+                    <input type="text" id="order-note" placeholder="Note (optional)" style="width:100%;padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;margin-bottom:12px"/>
+                    <button class="btn btn-primary" style="width:100%" onclick="placeOrder()">✓ Place Order & Print</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDERS LIST -->
+    <div class="page" id="page-orders-list">
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+                <div class="card-title" style="margin-bottom:0">📋 Orders History</div>
+                <input type="date" id="orders-date" style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif" onchange="loadOrders()"/>
+            </div>
+            <div id="orders-table-wrap"><div class="loading">Loading...</div></div>
+        </div>
+    </div>
+
+    <!-- COSTS PAGE -->
+    <div class="page" id="page-costs">
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-title">💸 Add Cost</div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="cost-desc" placeholder="e.g. Coffee beans, Milk..."/>
+                </div>
+                <div class="form-group">
+                    <label>Amount (৳)</label>
+                    <input type="number" id="cost-amount" placeholder="0.00" min="0" step="0.01"/>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="cost-cat-select"><option value="">Select category</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="cost-date"/>
+                </div>
+                <div class="form-group">
+                    <label>Note</label>
+                    <input type="text" id="cost-note" placeholder="Optional note..."/>
+                </div>
+                <button class="btn btn-amber" style="width:100%" onclick="addCost()">+ Add Cost</button>
+            </div>
+            <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                    <div class="card-title" style="margin-bottom:0">Today's Costs</div>
+                    <input type="date" id="costs-view-date" style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif" onchange="loadCosts()"/>
+                </div>
+                <div id="costs-list"><div class="loading">Loading...</div></div>
+                <div style="margin-top:16px;padding-top:16px;border-top:2px solid var(--gray-100);display:flex;justify-content:space-between;font-weight:700;font-size:16px">
+                    <span>Total Cost</span><span id="costs-total" style="color:var(--red)">৳0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+            <div class="card-title">🏷️ Cost Categories</div>
+            <div style="display:flex;gap:10px;margin-bottom:16px">
+                <input type="text" id="new-cost-cat" placeholder="New category name..." style="flex:1;padding:10px 14px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"/>
+                <input type="color" id="new-cost-cat-color" value="#E07B39" style="width:44px;height:44px;border:2px solid var(--gray-200);border-radius:var(--radius);cursor:pointer;padding:2px"/>
+                <button class="btn btn-amber" onclick="addCostCategory()">+ Add</button>
+            </div>
+            <div id="cost-cats-list"></div>
+        </div>
+    </div>
+
+    <!-- PRODUCTS PAGE -->
+    <div class="page" id="page-products">
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-title" id="product-form-title">🍽️ Add Product</div>
+                <input type="hidden" id="edit-product-id"/>
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="prod-name" placeholder="e.g. Cappuccino"/>
+                </div>
+                <div class="form-group">
+                    <label>Price (৳)</label>
+                    <input type="number" id="prod-price" placeholder="0.00" min="0" step="0.01"/>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="prod-cat"></select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="prod-desc" placeholder="Optional..."/>
+                </div>
+                <div style="display:flex;gap:10px">
+                    <button class="btn btn-amber" style="flex:1" onclick="saveProduct()">Save Product</button>
+                    <button class="btn btn-outline" onclick="resetProductForm()">Reset</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">All Products</div>
+                <div id="products-manage-list"><div class="loading">Loading...</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CATEGORIES PAGE -->
+    <div class="page" id="page-categories">
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-title">🏷️ Add Product Category</div>
+                <div class="form-group">
+                    <label>Category Name</label>
+                    <input type="text" id="new-cat-name" placeholder="e.g. Beverages"/>
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <input type="color" id="new-cat-color" value="#6F4E37" style="width:100%;height:44px;border:2px solid var(--gray-200);border-radius:var(--radius);cursor:pointer;padding:4px"/>
+                </div>
+                <button class="btn btn-amber" style="width:100%" onclick="addCategory()">+ Add Category</button>
+            </div>
+            <div class="card">
+                <div class="card-title">All Categories</div>
+                <div id="cats-list"><div class="loading">Loading...</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD (OWNER ONLY) -->
+    <div class="page" id="page-dashboard">
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
+            <h2 style="font-family:'Playfair Display',serif;font-size:24px;flex:1">📊 Owner Dashboard</h2>
+            <div style="display:flex;gap:8px;align-items:center">
+                <label style="font-size:13px;font-weight:600;color:var(--brown)">Date:</label>
+                <input type="date" id="dash-date" style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif" onchange="loadDashboard()"/>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+                <label style="font-size:13px;font-weight:600;color:var(--brown)">Month:</label>
+                <input type="month" id="dash-month" style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif" onchange="loadMonthly()"/>
+            </div>
+        </div>
+
+        <div class="stats-grid" id="dash-stats">
+            <div class="stat-card"><div class="stat-label">Today Sales</div><div class="stat-value amber" id="d-sales">৳0</div></div>
+            <div class="stat-card"><div class="stat-label">Today Costs</div><div class="stat-value red" id="d-costs">৳0</div></div>
+            <div class="stat-card"><div class="stat-label">Net Profit</div><div class="stat-value green" id="d-profit">৳0</div></div>
+            <div class="stat-card"><div class="stat-label">Orders Today</div><div class="stat-value" id="d-orders">0</div></div>
+            <div class="stat-card"><div class="stat-label">Avg Order</div><div class="stat-value amber" id="d-avg">৳0</div></div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:20px">
+            <div class="card">
+                <div class="card-title">📅 Monthly Sales vs Costs</div>
+                <div class="stats-grid" style="margin-bottom:16px">
+                    <div><div class="stat-label">Month Sales</div><div class="stat-value amber" id="m-sales">৳0</div></div>
+                    <div><div class="stat-label">Month Costs</div><div class="stat-value red" id="m-costs">৳0</div></div>
+                    <div><div class="stat-label">Month Profit</div><div class="stat-value green" id="m-profit">৳0</div></div>
+                </div>
+                <div id="monthly-chart"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">🏆 Top Products</div>
+                <div id="top-products-chart"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📋 Today's Orders</div>
+            <div id="dash-orders-table"><div class="loading">Loading...</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="modal-overlay" id="receipt-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">🧾 Order Receipt</span>
+            <button class="close-btn" onclick="closeReceipt()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="receipt" id="receipt-content"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" style="flex:1" onclick="printReceipt()">🖨️ Print</button>
+            <button class="btn btn-outline" onclick="closeReceipt()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- PRINT AREA -->
+<div id="print-area"></div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+    const API = '';
+    let currentUser = null;
+    let cart = [];
+    let paymentMethod = 'cash';
+    let allProducts = [];
+    let allCategories = [];
+
+    // ── UTILS ──────────────────────────────────────────────────────────────────
+    function fmt(n) { return '৳' + parseFloat(n||0).toLocaleString('en-IN', {minimumFractionDigits:0, maximumFractionDigits:2}); }
+    function today() { return new Date().toISOString().split('T')[0]; }
+    function thisMonth() { return new Date().toISOString().slice(0,7); }
+
+    function toast(msg, type='success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.className = `show ${type}`;
+        setTimeout(() => t.className = '', 3000);
+    }
+
+    async function api(path, opts={}) {
+        try {
+            const r = await fetch(API + path, { headers: {'Content-Type':'application/json'}, ...opts });
+            return await r.json();
+        } catch(e) { toast('Connection error', 'error'); return null; }
+    }
+
+    // ── AUTH ───────────────────────────────────────────────────────────────────
+    async function doLogin() {
+        const u = document.getElementById('login-username').value.trim();
+        const p = document.getElementById('login-password').value.trim();
+        if (!u || !p) { document.getElementById('login-error').textContent = 'Please enter both fields'; return; }
+
+        const res = await api('/api/login', { method:'POST', body: JSON.stringify({username:u, password:p}) });
+        if (res && res.success) {
+            currentUser = res.user;
+            document.getElementById('user-info').textContent = res.user.username;
+            const rb = document.getElementById('role-badge');
+            rb.textContent = res.user.role; rb.className = `role-badge role-${res.user.role}`;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+
+            // Show owner-only tabs
+            if (res.user.role === 'owner') {
+                document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'flex');
+            }
+
+            initApp();
+        } else {
+            document.getElementById('login-error').textContent = res?.message || 'Login failed';
+        }
+    }
+
+    function doLogout() {
+        currentUser = null; cart = [];
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('app').style.display = 'none';
+        document.getElementById('login-username').value = '';
+        document.getElementById('login-password').value = '';
+        document.getElementById('login-error').textContent = '';
+    }
+
+    document.getElementById('login-password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+    // ── NAVIGATION ────────────────────────────────────────────────────────────
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            tab.classList.add('active');
+            const page = tab.dataset.page;
+            document.getElementById('page-' + page).classList.add('active');
+            if (page === 'orders-list') loadOrders();
+            if (page === 'costs') loadCostPage();
+            if (page === 'products') loadProductsPage();
+            if (page === 'categories') loadCategoriesPage();
+            if (page === 'dashboard') loadDashboard();
+        });
+    });
+
+    // ── INIT ──────────────────────────────────────────────────────────────────
+    async function initApp() {
+        document.getElementById('dash-date').value = today();
+        document.getElementById('dash-month').value = thisMonth();
+        document.getElementById('orders-date').value = today();
+        document.getElementById('cost-date').value = today();
+        document.getElementById('costs-view-date').value = today();
+        await loadProductsForOrder();
+    }
+
+    // ── PRODUCTS FOR ORDER ────────────────────────────────────────────────────
+    async function loadProductsForOrder() {
+        const data = await api('/api/products');
+        if (!data) return;
+        allProducts = data;
+
+        const cats = [...new Set(data.map(p => p.categories?.name || 'Other'))];
+        allCategories = cats;
+
+        const filter = document.getElementById('cat-filter');
+        filter.innerHTML = `<button class="cat-btn active" onclick="filterCat('all',this)">All</button>`;
+        cats.forEach(c => {
+            filter.innerHTML += `<button class="cat-btn" onclick="filterCat('${c}',this)">${c}</button>`;
+        });
+
+        renderProductGrid(data);
+    }
+
+    function renderProductGrid(products) {
+        const emojis = { 'Coffee':'☕','Tea':'🍵','Food':'🥪','Cold Drinks':'🥤','Desserts':'🍰','Drinks':'🧃' };
+        const grid = document.getElementById('products-grid');
+        if (!products.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🍽️</div>No products found</div>'; return; }
+        grid.innerHTML = products.map(p => `
+    <div class="product-card" onclick="addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+      <div class="product-emoji">${emojis[p.categories?.name] || '🍽️'}</div>
+      <div class="product-name">${p.name}</div>
+      <div class="product-price">${fmt(p.price)}</div>
+    </div>
+  `).join('');
+    }
+
+    function filterCat(cat, btn) {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filtered = cat === 'all' ? allProducts : allProducts.filter(p => (p.categories?.name || 'Other') === cat);
+        renderProductGrid(filtered);
+    }
+
+    // ── CART ──────────────────────────────────────────────────────────────────
+    function addToCart(product) {
+        const existing = cart.find(i => i.id === product.id);
+        if (existing) { existing.quantity++; }
+        else { cart.push({ ...product, quantity: 1 }); }
+        renderCart();
+    }
+
+    function updateQty(id, delta) {
+        const item = cart.find(i => i.id === id);
+        if (!item) return;
+        item.quantity += delta;
+        if (item.quantity <= 0) cart = cart.filter(i => i.id !== id);
+        renderCart();
+    }
+
+    function clearCart() { cart = []; renderCart(); }
+
+    function renderCart() {
+        const el = document.getElementById('cart-items');
+        const summary = document.getElementById('cart-summary');
+        if (!cart.length) {
+            el.innerHTML = '<div class="cart-empty">☕ Add items to order</div>';
+            summary.style.display = 'none';
+            return;
+        }
+        el.innerHTML = cart.map(i => `
+    <div class="cart-item">
+      <div>
+        <div class="cart-item-name">${i.name}</div>
+        <div class="cart-item-price">${fmt(i.price)} each</div>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="updateQty('${i.id}',-1)">−</button>
+        <span class="qty-num">${i.quantity}</span>
+        <button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button>
+      </div>
+      <div style="min-width:60px;text-align:right;font-weight:600;font-size:14px">${fmt(i.price * i.quantity)}</div>
+    </div>
+  `).join('');
+        summary.style.display = 'block';
+        recalcTotal();
+    }
+
+    function recalcTotal() {
+        const subtotal = cart.reduce((s,i) => s + i.price * i.quantity, 0);
+        const dtype = document.getElementById('discount-type').value;
+        const dval = parseFloat(document.getElementById('discount-val').value) || 0;
+        let discount = 0;
+        if (dtype === 'percent') discount = subtotal * dval / 100;
+        else if (dtype === 'flat') discount = Math.min(dval, subtotal);
+        const total = subtotal - discount;
+
+        document.getElementById('s-subtotal').textContent = fmt(subtotal);
+        document.getElementById('s-total').textContent = fmt(total);
+        const drow = document.getElementById('discount-row');
+        if (discount > 0) { drow.style.display = 'flex'; document.getElementById('s-discount').textContent = '-' + fmt(discount); }
+        else { drow.style.display = 'none'; }
+    }
+
+    function setPayment(method) {
+        paymentMethod = method;
+        ['cash','card','mobile'].forEach(m => document.getElementById('pay-'+m).classList.toggle('active', m===method));
+    }
+
+    async function placeOrder() {
+        if (!cart.length) { toast('Cart is empty', 'error'); return; }
+        const dtype = document.getElementById('discount-type').value;
+        const dval = parseFloat(document.getElementById('discount-val').value) || 0;
+        const note = document.getElementById('order-note').value;
+
+        const payload = {
+            items: cart.map(i => ({ product_id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
+            discount_type: dtype, discount_value: dval,
+            payment_method: paymentMethod, note
+        };
+
+        const res = await api('/api/orders', { method:'POST', body: JSON.stringify(payload) });
+        if (res && res.success) {
+            showReceipt(res);
+            clearCart();
+            document.getElementById('discount-type').value = 'none';
+            document.getElementById('discount-val').value = '';
+            document.getElementById('order-note').value = '';
+            toast('Order placed!', 'success');
+        } else {
+            toast('Failed to place order', 'error');
+        }
+    }
+
+    // ── RECEIPT ───────────────────────────────────────────────────────────────
+    function showReceipt(order) {
+        const items = cart.length ? cart : [];
+        const now = new Date();
+        let html = `
+    <div class="receipt-header">
+      <h2>☕ Beans & Butter</h2>
+      <p>Order #${order.order_number}</p>
+      <p>${now.toLocaleDateString()} ${now.toLocaleTimeString()}</p>
+      <p>Payment: ${order.order?.payment_method || paymentMethod}</p>
+    </div>
+  `;
+        // We keep the cart items in memory for the receipt
+        const cartSnapshot = [...cart];
+        window._lastCartSnapshot = cartSnapshot.length ? cartSnapshot : window._receiptCartItems || [];
+
+        (window._receiptCartItems || []).forEach(i => {
+            html += `<div class="receipt-item"><span>${i.name} x${i.quantity}</span><span>${fmt(i.price * i.quantity)}</span></div>`;
+        });
+
+        html += `<hr class="receipt-divider"/>`;
+        html += `<div class="receipt-item"><span>Subtotal</span><span>${fmt(order.subtotal)}</span></div>`;
+        if (order.discount_amount > 0) html += `<div class="receipt-item" style="color:var(--red)"><span>Discount</span><span>-${fmt(order.discount_amount)}</span></div>`;
+        html += `<hr class="receipt-divider"/>`;
+        html += `<div class="receipt-total"><span>TOTAL</span><span>${fmt(order.total)}</span></div>`;
+        html += `<div class="receipt-thanks"><p style="margin-top:16px">Thank you for visiting!</p><p>Beans & Butter Cafe</p></div>`;
+
+        document.getElementById('receipt-content').innerHTML = html;
+        document.getElementById('receipt-modal').classList.add('open');
+    }
+
+    // Store cart before clearing for receipt
+    const _origPlaceOrder = placeOrder;
+    async function placeOrder() {
+        if (!cart.length) { toast('Cart is empty', 'error'); return; }
+        window._receiptCartItems = [...cart];
+        await _origPlaceOrder();
+    }
+
+    function closeReceipt() { document.getElementById('receipt-modal').classList.remove('open'); }
+
+    function printReceipt() {
+        const content = document.getElementById('receipt-content').innerHTML;
+        document.getElementById('print-area').innerHTML = `
+    <div style="font-family:monospace;max-width:300px;margin:0 auto;padding:20px">
+      ${content}
+    </div>`;
+        window.print();
+    }
+
+    // ── ORDERS LIST ───────────────────────────────────────────────────────────
+    async function loadOrders() {
+        const date = document.getElementById('orders-date').value || today();
+        const data = await api('/api/orders?date=' + date);
+        const wrap = document.getElementById('orders-table-wrap');
+        if (!data || !data.length) {
+            wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>No orders for this date</div>';
+            return;
+        }
+        const total = data.reduce((s,o) => s + parseFloat(o.total), 0);
+        wrap.innerHTML = `
+    <table class="data-table">
+      <thead><tr><th>Order #</th><th>Time</th><th>Subtotal</th><th>Discount</th><th>Total</th><th>Payment</th><th>Note</th></tr></thead>
+      <tbody>
+        ${data.map(o => `
+          <tr>
+            <td><strong>${o.order_number}</strong></td>
+            <td>${new Date(o.created_at).toLocaleTimeString()}</td>
+            <td>${fmt(o.subtotal)}</td>
+            <td>${o.discount_amount > 0 ? `<span style="color:var(--red)">-${fmt(o.discount_amount)}</span>` : '—'}</td>
+            <td><strong>${fmt(o.total)}</strong></td>
+            <td><span class="badge badge-green">${o.payment_method}</span></td>
+            <td>${o.note || '—'}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+      <tfoot><tr><td colspan="4" style="padding:12px 16px;font-weight:700">TOTAL (${data.length} orders)</td><td style="padding:12px 16px;font-weight:700;color:var(--amber);font-size:16px">${fmt(total)}</td><td colspan="2"></td></tr></tfoot>
+    </table>
+  `;
+    }
+
+    // ── COSTS ─────────────────────────────────────────────────────────────────
+    async function loadCostPage() {
+        await loadCostCategories();
+        await loadCosts();
+    }
+
+    async function loadCostCategories() {
+        const data = await api('/api/cost-categories');
+        if (!data) return;
+
+        const sel = document.getElementById('cost-cat-select');
+        sel.innerHTML = '<option value="">Select category</option>' + data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+        const list = document.getElementById('cost-cats-list');
+        list.innerHTML = data.length ? `
+    <div style="display:flex;flex-wrap:wrap;gap:8px">
+      ${data.map(c => `
+        <div style="display:flex;align-items:center;gap:6px;background:var(--gray-50);padding:8px 14px;border-radius:20px;border:2px solid var(--gray-100)">
+          <span class="color-dot" style="background:${c.color}"></span>
+          <span style="font-size:14px;font-weight:500">${c.name}</span>
+          <button class="btn-logout" style="font-size:12px;padding:2px 8px;margin-left:4px" onclick="deleteCostCat('${c.id}')">✕</button>
+        </div>
+      `).join('')}
+    </div>
+  ` : '<div class="empty-state" style="padding:20px">No cost categories yet</div>';
+    }
+
+    async function addCostCategory() {
+        const name = document.getElementById('new-cost-cat').value.trim();
+        const color = document.getElementById('new-cost-cat-color').value;
+        if (!name) { toast('Enter category name', 'error'); return; }
+        await api('/api/cost-categories', { method:'POST', body: JSON.stringify({name, color}) });
+        document.getElementById('new-cost-cat').value = '';
+        toast('Category added!');
+        await loadCostCategories();
+    }
+
+    async function deleteCostCat(id) {
+        await api('/api/cost-categories/' + id, { method:'DELETE' });
+        toast('Deleted'); await loadCostCategories();
+    }
+
+    async function loadCosts() {
+        const date = document.getElementById('costs-view-date').value || today();
+        const data = await api('/api/costs?date=' + date);
+        const list = document.getElementById('costs-list');
+
+        if (!data || !data.length) {
+            list.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-icon">💸</div>No costs for this date</div>';
+            document.getElementById('costs-total').textContent = fmt(0); return;
+        }
+
+        const total = data.reduce((s,c) => s + parseFloat(c.amount), 0);
+        list.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${data.map(c => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-100)">
+          <div style="display:flex;align-items:center;gap:8px">
+            ${c.cost_categories ? `<span class="color-dot" style="background:${c.cost_categories.color}"></span>` : ''}
+            <div>
+              <div style="font-weight:600;font-size:14px">${c.description}</div>
+              <div style="font-size:12px;color:var(--gray-400)">${c.cost_categories?.name || 'Uncategorized'}${c.note ? ' · ' + c.note : ''}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-weight:700;color:var(--red)">${fmt(c.amount)}</span>
+            <button class="btn btn-xs btn-red" onclick="deleteCost('${c.id}')">✕</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+        document.getElementById('costs-total').textContent = fmt(total);
+    }
+
+    async function addCost() {
+        const desc = document.getElementById('cost-desc').value.trim();
+        const amount = parseFloat(document.getElementById('cost-amount').value);
+        const cat_id = document.getElementById('cost-cat-select').value;
+        const date = document.getElementById('cost-date').value || today();
+        const note = document.getElementById('cost-note').value;
+
+        if (!desc) { toast('Enter description', 'error'); return; }
+        if (!amount || amount <= 0) { toast('Enter valid amount', 'error'); return; }
+
+        await api('/api/costs', { method:'POST', body: JSON.stringify({
+                description: desc, amount, cost_category_id: cat_id || null, date, note
+            })});
+        document.getElementById('cost-desc').value = '';
+        document.getElementById('cost-amount').value = '';
+        document.getElementById('cost-note').value = '';
+        toast('Cost added!'); await loadCosts();
+    }
+
+    async function deleteCost(id) {
+        await api('/api/costs/' + id, { method:'DELETE' });
+        toast('Deleted'); await loadCosts();
+    }
+
+    // ── PRODUCTS MANAGEMENT ───────────────────────────────────────────────────
+    async function loadProductsPage() {
+        const data = await api('/api/products');
+        const cats = await api('/api/categories');
+
+        const catSel = document.getElementById('prod-cat');
+        catSel.innerHTML = '<option value="">No Category</option>' + (cats || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+        const list = document.getElementById('products-manage-list');
+        if (!data || !data.length) { list.innerHTML = '<div class="empty-state">No products yet</div>'; return; }
+
+        list.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto">
+      ${data.map(p => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-100)">
+          <div>
+            <div style="font-weight:600;font-size:14px">${p.name}</div>
+            <div style="font-size:12px;color:var(--gray-400)">${p.categories?.name || 'Uncategorized'}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-weight:700;color:var(--amber)">${fmt(p.price)}</span>
+            <button class="btn btn-xs btn-outline" onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&apos;")})'>Edit</button>
+            <button class="btn btn-xs btn-red" onclick="deleteProduct('${p.id}')">✕</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+    }
+
+    function editProduct(p) {
+        document.getElementById('edit-product-id').value = p.id;
+        document.getElementById('prod-name').value = p.name;
+        document.getElementById('prod-price').value = p.price;
+        document.getElementById('prod-cat').value = p.category_id || '';
+        document.getElementById('prod-desc').value = p.description || '';
+        document.getElementById('product-form-title').textContent = '✏️ Edit Product';
+    }
+
+    function resetProductForm() {
+        document.getElementById('edit-product-id').value = '';
+        document.getElementById('prod-name').value = '';
+        document.getElementById('prod-price').value = '';
+        document.getElementById('prod-desc').value = '';
+        document.getElementById('product-form-title').textContent = '🍽️ Add Product';
+    }
+
+    async function saveProduct() {
+        const id = document.getElementById('edit-product-id').value;
+        const name = document.getElementById('prod-name').value.trim();
+        const price = parseFloat(document.getElementById('prod-price').value);
+        const category_id = document.getElementById('prod-cat').value || null;
+        const description = document.getElementById('prod-desc').value;
+
+        if (!name) { toast('Enter product name', 'error'); return; }
+        if (!price || price <= 0) { toast('Enter valid price', 'error'); return; }
+
+        const body = JSON.stringify({ name, price, category_id, description });
+        if (id) {
+            await api('/api/products/' + id, { method:'PUT', body });
+            toast('Product updated!');
+        } else {
+            await api('/api/products', { method:'POST', body });
+            toast('Product added!');
+        }
+        resetProductForm();
+        await loadProductsPage();
+        await loadProductsForOrder();
+    }
+
+    async function deleteProduct(id) {
+        if (!confirm('Delete this product?')) return;
+        await api('/api/products/' + id, { method:'DELETE' });
+        toast('Deleted'); await loadProductsPage(); await loadProductsForOrder();
+    }
+
+    // ── CATEGORIES ────────────────────────────────────────────────────────────
+    async function loadCategoriesPage() {
+        const data = await api('/api/categories');
+        const list = document.getElementById('cats-list');
+        if (!data || !data.length) { list.innerHTML = '<div class="empty-state">No categories yet</div>'; return; }
+        list.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${data.map(c => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-100)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="color-dot" style="background:${c.color}"></span>
+            <span style="font-weight:600;font-size:14px">${c.name}</span>
+          </div>
+          <button class="btn btn-xs btn-red" onclick="deleteCategory('${c.id}')">✕</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+    }
+
+    async function addCategory() {
+        const name = document.getElementById('new-cat-name').value.trim();
+        const color = document.getElementById('new-cat-color').value;
+        if (!name) { toast('Enter category name', 'error'); return; }
+        await api('/api/categories', { method:'POST', body: JSON.stringify({name, color}) });
+        document.getElementById('new-cat-name').value = '';
+        toast('Category added!'); await loadCategoriesPage();
+    }
+
+    async function deleteCategory(id) {
+        await api('/api/categories/' + id, { method:'DELETE' });
+        toast('Deleted'); await loadCategoriesPage();
+    }
+
+    // ── DASHBOARD ─────────────────────────────────────────────────────────────
+    async function loadDashboard() {
+        const date = document.getElementById('dash-date').value || today();
+        const data = await api('/api/dashboard/daily?date=' + date);
+        if (!data) return;
+
+        document.getElementById('d-sales').textContent = fmt(data.total_sales);
+        document.getElementById('d-costs').textContent = fmt(data.total_costs);
+        const profit = data.net_profit;
+        const profitEl = document.getElementById('d-profit');
+        profitEl.textContent = fmt(profit);
+        profitEl.className = 'stat-value ' + (profit >= 0 ? 'green' : 'red');
+        document.getElementById('d-orders').textContent = data.order_count;
+        document.getElementById('d-avg').textContent = fmt(data.avg_order);
+
+        // Orders table
+        const wrap = document.getElementById('dash-orders-table');
+        if (!data.orders || !data.orders.length) {
+            wrap.innerHTML = '<div class="empty-state">No orders today</div>';
+        } else {
+            wrap.innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>Order #</th><th>Time</th><th>Total</th><th>Payment</th><th>Discount</th></tr></thead>
+        <tbody>
+          ${data.orders.map(o => `
+            <tr>
+              <td><strong>${o.order_number}</strong></td>
+              <td>${new Date(o.created_at).toLocaleTimeString()}</td>
+              <td><strong style="color:var(--amber)">${fmt(o.total)}</strong></td>
+              <td><span class="badge badge-green">${o.payment_method}</span></td>
+              <td>${o.discount_amount > 0 ? fmt(o.discount_amount) : '—'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+        }
+
+        await loadMonthly();
+        await loadTopProducts();
+    }
+
+    async function loadMonthly() {
+        const month = document.getElementById('dash-month').value || thisMonth();
+        const [year, m] = month.split('-');
+        const data = await api(`/api/dashboard/monthly?year=${year}&month=${m}`);
+        if (!data) return;
+
+        document.getElementById('m-sales').textContent = fmt(data.total_sales);
+        document.getElementById('m-costs').textContent = fmt(data.total_costs);
+        const mp = data.net_profit;
+        const mpEl = document.getElementById('m-profit');
+        mpEl.textContent = fmt(mp); mpEl.className = 'stat-value ' + (mp >= 0 ? 'green' : 'red');
+
+        // Bar chart
+        const chartEl = document.getElementById('monthly-chart');
+        if (!data.chart_data || !data.chart_data.length) {
+            chartEl.innerHTML = '<div class="empty-state" style="padding:20px">No data for this month</div>'; return;
+        }
+
+        const maxVal = Math.max(...data.chart_data.map(d => Math.max(d.sales, d.costs, 0.1)));
+        chartEl.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto">
+      ${data.chart_data.map(d => `
+        <div>
+          <div style="font-size:11px;color:var(--gray-400);margin-bottom:3px">${d.date.slice(5)}</div>
+          <div class="chart-bar-row" style="margin-bottom:2px">
+            <div class="chart-bar-track" style="flex:1">
+              <div class="chart-bar-fill" style="width:${(d.sales/maxVal*100).toFixed(1)}%;background:var(--amber)"></div>
+            </div>
+            <div style="width:80px;font-size:11px;text-align:right;color:var(--amber);font-weight:600">${fmt(d.sales)}</div>
+          </div>
+          <div class="chart-bar-row">
+            <div class="chart-bar-track" style="flex:1">
+              <div class="chart-bar-fill" style="width:${(d.costs/maxVal*100).toFixed(1)}%;background:var(--red)"></div>
+            </div>
+            <div style="width:80px;font-size:11px;text-align:right;color:var(--red);font-weight:600">${fmt(d.costs)}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="display:flex;gap:16px;margin-top:12px;font-size:12px">
+      <span><span style="display:inline-block;width:12px;height:12px;background:var(--amber);border-radius:2px;margin-right:4px"></span>Sales</span>
+      <span><span style="display:inline-block;width:12px;height:12px;background:var(--red);border-radius:2px;margin-right:4px"></span>Costs</span>
+    </div>
+  `;
+    }
+
+    async function loadTopProducts() {
+        const data = await api('/api/dashboard/top-products');
+        const el = document.getElementById('top-products-chart');
+        if (!data || !data.length) { el.innerHTML = '<div class="empty-state">No data</div>'; return; }
+        const maxRev = Math.max(...data.map(p => p.revenue));
+        el.innerHTML = `
+    <div class="chart-bar-wrap">
+      ${data.map(p => `
+        <div class="chart-bar-row">
+          <div class="chart-bar-label">${p.name.slice(0,10)}</div>
+          <div class="chart-bar-track">
+            <div class="chart-bar-fill" style="width:${(p.revenue/maxRev*100).toFixed(1)}%;background:var(--brown)"></div>
+          </div>
+          <div class="chart-bar-val">${fmt(p.revenue)}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+    }
+</script>
+</body>
+</html>
