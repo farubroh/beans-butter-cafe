@@ -127,6 +127,29 @@
         .order-layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
         @media(max-width:900px){ .order-layout { grid-template-columns: 1fr; } }
 
+        /* ── SEARCH BAR ── */
+        .search-wrap {
+            position: relative; margin-bottom: 14px;
+        }
+        .search-wrap input {
+            width: 100%; padding: 10px 16px 10px 42px;
+            border: 2px solid var(--gray-200); border-radius: var(--radius);
+            font-family: 'DM Sans', sans-serif; font-size: 14px;
+            color: var(--brown-dark); background: var(--white);
+            transition: border-color 0.2s;
+        }
+        .search-wrap input:focus { outline: none; border-color: var(--amber); }
+        .search-wrap .search-icon {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            font-size: 16px; pointer-events: none; color: var(--gray-400);
+        }
+        .search-wrap .clear-search {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; color: var(--gray-400);
+            font-size: 18px; line-height: 1; display: none; padding: 2px;
+        }
+        .search-wrap .clear-search.visible { display: block; }
+
         .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
         .product-card {
             background: var(--white); border: 2px solid var(--gray-100); border-radius: var(--radius);
@@ -241,6 +264,11 @@
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: var(--gray-100); }
         ::-webkit-scrollbar-thumb { background: var(--gray-200); border-radius: 3px; }
+
+        /* ── SEARCH RESULT COUNT ── */
+        .search-result-count {
+            font-size: 12px; color: var(--gray-400); margin-bottom: 10px; margin-top: -6px;
+        }
     </style>
 </head>
 <body>
@@ -293,7 +321,24 @@
     <div class="page active" id="page-order">
         <div class="order-layout">
             <div>
+                <!-- SEARCH BAR -->
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input
+                            type="text"
+                            id="product-search"
+                            placeholder="Search products by name..."
+                            oninput="handleSearch(this.value)"
+                            autocomplete="off"
+                    />
+                    <button class="clear-search" id="clear-search-btn" onclick="clearSearch()" title="Clear search">✕</button>
+                </div>
+                <div id="search-result-count" class="search-result-count" style="display:none"></div>
+
+                <!-- CATEGORY FILTER -->
                 <div class="cat-filter" id="cat-filter"></div>
+
+                <!-- PRODUCTS GRID -->
                 <div class="products-grid" id="products-grid">
                     <div class="loading">Loading products...</div>
                 </div>
@@ -308,7 +353,7 @@
                 <div class="cart-summary" id="cart-summary" style="display:none">
                     <div class="summary-row"><span>Subtotal</span><span id="s-subtotal">৳0</span></div>
                     <div class="discount-row">
-                        <select class="form-group" id="discount-type" style="padding:8px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;width:100%" onchange="recalcTotal()">
+                        <select id="discount-type" style="padding:8px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;width:100%" onchange="recalcTotal()">
                             <option value="none">No Discount</option>
                             <option value="percent">% Discount</option>
                             <option value="flat">Flat (৳)</option>
@@ -325,7 +370,7 @@
                         <button class="pay-btn" id="pay-mobile" onclick="setPayment('mobile')">📱 Mobile</button>
                     </div>
                     <input type="text" id="order-note" placeholder="Note (optional)" style="width:100%;padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;margin-bottom:12px"/>
-                    <button class="btn btn-primary" style="width:100%" onclick="placeOrder()">✓ Place Order & Print</button>
+                    <button class="btn btn-primary" style="width:100%" onclick="placeOrder()">✓ Place Order</button>
                 </div>
             </div>
         </div>
@@ -523,6 +568,7 @@
     let paymentMethod = 'cash';
     let allProducts = [];
     let allCategories = [];
+    let activeCategory = 'all'; // track active category filter
 
     // ── UTILS ──────────────────────────────────────────────────────────────────
     function fmt(n) { return '৳' + parseFloat(n||0).toLocaleString('en-IN', {minimumFractionDigits:0, maximumFractionDigits:2}); }
@@ -557,11 +603,9 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app').style.display = 'block';
 
-            // Show owner-only tabs
             if (res.user.role === 'owner') {
                 document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'flex');
             }
-
             initApp();
         } else {
             document.getElementById('login-error').textContent = res?.message || 'Login failed';
@@ -623,25 +667,100 @@
         renderProductGrid(data);
     }
 
+    function getEmoji(categoryName) {
+        const emojis = {
+            'Coffee': '☕', 'Iced Coffee': '🧊', 'Tea': '🍵',
+            'Food': '🥪', 'Cold Drinks': '🥤', 'Desserts': '🍰',
+            'Chicken': '🍗', 'Pasta': '🍝', 'Sides': '🍟',
+            'Add On': '➕', 'Waffle Menu': '🧇', 'Shakes': '🥤',
+            'Mocktails': '🍹', 'Affogato': '☕', 'Milk Tea': '🧋',
+        };
+        return emojis[categoryName] || '🍽️';
+    }
+
     function renderProductGrid(products) {
-        const emojis = { 'Coffee':'☕','Tea':'🍵','Food':'🥪','Cold Drinks':'🥤','Desserts':'🍰','Drinks':'🧃' };
         const grid = document.getElementById('products-grid');
-        if (!products.length) { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🍽️</div>No products found</div>'; return; }
+        if (!products.length) {
+            grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div>No products found</div>';
+            return;
+        }
         grid.innerHTML = products.map(p => `
-    <div class="product-card" onclick="addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')})">
-      <div class="product-emoji">${emojis[p.categories?.name] || '🍽️'}</div>
-      <div class="product-name">${p.name}</div>
-      <div class="product-price">${fmt(p.price)}</div>
-    </div>
-  `).join('');
+            <div class="product-card" onclick="addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+                <div class="product-emoji">${getEmoji(p.categories?.name)}</div>
+                <div class="product-name">${p.name}</div>
+                <div class="product-price">${fmt(p.price)}</div>
+            </div>
+        `).join('');
+    }
+
+    // ── SEARCH ────────────────────────────────────────────────────────────────
+    function handleSearch(query) {
+        const clearBtn = document.getElementById('clear-search-btn');
+        const countEl = document.getElementById('search-result-count');
+        const trimmed = query.trim().toLowerCase();
+
+        clearBtn.classList.toggle('visible', trimmed.length > 0);
+
+        if (!trimmed) {
+            // Restore category filter view
+            countEl.style.display = 'none';
+            applyFilters();
+            return;
+        }
+
+        // Search across ALL products regardless of category filter
+        const results = allProducts.filter(p =>
+            p.name.toLowerCase().includes(trimmed) ||
+            (p.categories?.name || '').toLowerCase().includes(trimmed)
+        );
+
+        countEl.style.display = 'block';
+        countEl.textContent = results.length
+            ? `${results.length} result${results.length !== 1 ? 's' : ''} for "${query.trim()}"`
+            : `No results for "${query.trim()}"`;
+
+        renderProductGrid(results);
+    }
+
+    function clearSearch() {
+        const input = document.getElementById('product-search');
+        input.value = '';
+        document.getElementById('clear-search-btn').classList.remove('visible');
+        document.getElementById('search-result-count').style.display = 'none';
+        applyFilters();
+        input.focus();
     }
 
     function filterCat(cat, btn) {
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        const filtered = cat === 'all' ? allProducts : allProducts.filter(p => (p.categories?.name || 'Other') === cat);
+        activeCategory = cat;
+
+        // Clear search when switching category
+        const searchInput = document.getElementById('product-search');
+        if (searchInput.value) {
+            searchInput.value = '';
+            document.getElementById('clear-search-btn').classList.remove('visible');
+            document.getElementById('search-result-count').style.display = 'none';
+        }
+
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const filtered = activeCategory === 'all'
+            ? allProducts
+            : allProducts.filter(p => (p.categories?.name || 'Other') === activeCategory);
         renderProductGrid(filtered);
     }
+
+    // Keyboard shortcut: press "/" to focus search
+    document.addEventListener('keydown', e => {
+        if (e.key === '/' && document.getElementById('page-order').classList.contains('active')) {
+            e.preventDefault();
+            document.getElementById('product-search').focus();
+        }
+    });
 
     // ── CART ──────────────────────────────────────────────────────────────────
     function addToCart(product) {
@@ -670,19 +789,19 @@
             return;
         }
         el.innerHTML = cart.map(i => `
-    <div class="cart-item">
-      <div>
-        <div class="cart-item-name">${i.name}</div>
-        <div class="cart-item-price">${fmt(i.price)} each</div>
-      </div>
-      <div class="qty-ctrl">
-        <button class="qty-btn" onclick="updateQty('${i.id}',-1)">−</button>
-        <span class="qty-num">${i.quantity}</span>
-        <button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button>
-      </div>
-      <div style="min-width:60px;text-align:right;font-weight:600;font-size:14px">${fmt(i.price * i.quantity)}</div>
-    </div>
-  `).join('');
+            <div class="cart-item">
+                <div>
+                    <div class="cart-item-name">${i.name}</div>
+                    <div class="cart-item-price">${fmt(i.price)} each</div>
+                </div>
+                <div class="qty-ctrl">
+                    <button class="qty-btn" onclick="updateQty('${i.id}',-1)">−</button>
+                    <span class="qty-num">${i.quantity}</span>
+                    <button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button>
+                </div>
+                <div style="min-width:60px;text-align:right;font-weight:600;font-size:14px">${fmt(i.price * i.quantity)}</div>
+            </div>
+        `).join('');
         summary.style.display = 'block';
         recalcTotal();
     }
@@ -708,21 +827,34 @@
         ['cash','card','mobile'].forEach(m => document.getElementById('pay-'+m).classList.toggle('active', m===method));
     }
 
+    // ── PLACE ORDER (fixed — single declaration, no redefinition bug) ─────────
     async function placeOrder() {
         if (!cart.length) { toast('Cart is empty', 'error'); return; }
+
         const dtype = document.getElementById('discount-type').value;
         const dval = parseFloat(document.getElementById('discount-val').value) || 0;
         const note = document.getElementById('order-note').value;
 
+        // Snapshot cart before clearing
+        const cartSnapshot = [...cart];
+
         const payload = {
-            items: cart.map(i => ({ product_id: i.id, name: i.name, price: i.price, quantity: i.quantity })),
-            discount_type: dtype, discount_value: dval,
-            payment_method: paymentMethod, note
+            items: cartSnapshot.map(i => ({
+                product_id: i.id,
+                name: i.name,
+                price: i.price,
+                quantity: i.quantity
+            })),
+            discount_type: dtype,
+            discount_value: dval,
+            payment_method: paymentMethod,
+            note
         };
 
         const res = await api('/api/orders', { method:'POST', body: JSON.stringify(payload) });
+
         if (res && res.success) {
-            showReceipt(res);
+            showReceipt(res, cartSnapshot);
             clearCart();
             document.getElementById('discount-type').value = 'none';
             document.getElementById('discount-val').value = '';
@@ -734,42 +866,30 @@
     }
 
     // ── RECEIPT ───────────────────────────────────────────────────────────────
-    function showReceipt(order) {
-        const items = cart.length ? cart : [];
+    function showReceipt(orderRes, cartSnapshot) {
         const now = new Date();
         let html = `
-    <div class="receipt-header">
-      <h2>☕ Beans & Butter</h2>
-      <p>Order #${order.order_number}</p>
-      <p>${now.toLocaleDateString()} ${now.toLocaleTimeString()}</p>
-      <p>Payment: ${order.order?.payment_method || paymentMethod}</p>
-    </div>
-  `;
-        // We keep the cart items in memory for the receipt
-        const cartSnapshot = [...cart];
-        window._lastCartSnapshot = cartSnapshot.length ? cartSnapshot : window._receiptCartItems || [];
-
-        (window._receiptCartItems || []).forEach(i => {
+            <div class="receipt-header">
+                <h2>☕ Beans & Butter</h2>
+                <p>Order #${orderRes.order_number}</p>
+                <p>${now.toLocaleDateString()} ${now.toLocaleTimeString()}</p>
+                <p>Payment: ${paymentMethod}</p>
+            </div>
+        `;
+        cartSnapshot.forEach(i => {
             html += `<div class="receipt-item"><span>${i.name} x${i.quantity}</span><span>${fmt(i.price * i.quantity)}</span></div>`;
         });
-
         html += `<hr class="receipt-divider"/>`;
-        html += `<div class="receipt-item"><span>Subtotal</span><span>${fmt(order.subtotal)}</span></div>`;
-        if (order.discount_amount > 0) html += `<div class="receipt-item" style="color:var(--red)"><span>Discount</span><span>-${fmt(order.discount_amount)}</span></div>`;
+        html += `<div class="receipt-item"><span>Subtotal</span><span>${fmt(orderRes.subtotal)}</span></div>`;
+        if (orderRes.discount_amount > 0) {
+            html += `<div class="receipt-item" style="color:var(--red)"><span>Discount</span><span>-${fmt(orderRes.discount_amount)}</span></div>`;
+        }
         html += `<hr class="receipt-divider"/>`;
-        html += `<div class="receipt-total"><span>TOTAL</span><span>${fmt(order.total)}</span></div>`;
+        html += `<div class="receipt-total"><span>TOTAL</span><span>${fmt(orderRes.total)}</span></div>`;
         html += `<div class="receipt-thanks"><p style="margin-top:16px">Thank you for visiting!</p><p>Beans & Butter Cafe</p></div>`;
 
         document.getElementById('receipt-content').innerHTML = html;
         document.getElementById('receipt-modal').classList.add('open');
-    }
-
-    // Store cart before clearing for receipt
-    const _origPlaceOrder = placeOrder;
-    async function placeOrder() {
-        if (!cart.length) { toast('Cart is empty', 'error'); return; }
-        window._receiptCartItems = [...cart];
-        await _origPlaceOrder();
     }
 
     function closeReceipt() { document.getElementById('receipt-modal').classList.remove('open'); }
@@ -777,9 +897,8 @@
     function printReceipt() {
         const content = document.getElementById('receipt-content').innerHTML;
         document.getElementById('print-area').innerHTML = `
-    <div style="font-family:monospace;max-width:300px;margin:0 auto;padding:20px">
-      ${content}
-    </div>`;
+            <div style="font-family:monospace;max-width:300px;margin:0 auto;padding:20px">${content}</div>
+        `;
         window.print();
     }
 
@@ -794,24 +913,28 @@
         }
         const total = data.reduce((s,o) => s + parseFloat(o.total), 0);
         wrap.innerHTML = `
-    <table class="data-table">
-      <thead><tr><th>Order #</th><th>Time</th><th>Subtotal</th><th>Discount</th><th>Total</th><th>Payment</th><th>Note</th></tr></thead>
-      <tbody>
-        ${data.map(o => `
-          <tr>
-            <td><strong>${o.order_number}</strong></td>
-            <td>${new Date(o.created_at).toLocaleTimeString()}</td>
-            <td>${fmt(o.subtotal)}</td>
-            <td>${o.discount_amount > 0 ? `<span style="color:var(--red)">-${fmt(o.discount_amount)}</span>` : '—'}</td>
-            <td><strong>${fmt(o.total)}</strong></td>
-            <td><span class="badge badge-green">${o.payment_method}</span></td>
-            <td>${o.note || '—'}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-      <tfoot><tr><td colspan="4" style="padding:12px 16px;font-weight:700">TOTAL (${data.length} orders)</td><td style="padding:12px 16px;font-weight:700;color:var(--amber);font-size:16px">${fmt(total)}</td><td colspan="2"></td></tr></tfoot>
-    </table>
-  `;
+            <table class="data-table">
+                <thead><tr><th>Order #</th><th>Time</th><th>Subtotal</th><th>Discount</th><th>Total</th><th>Payment</th><th>Note</th></tr></thead>
+                <tbody>
+                    ${data.map(o => `
+                        <tr>
+                            <td><strong>${o.order_number}</strong></td>
+                            <td>${new Date(o.created_at).toLocaleTimeString()}</td>
+                            <td>${fmt(o.subtotal)}</td>
+                            <td>${o.discount_amount > 0 ? `<span style="color:var(--red)">-${fmt(o.discount_amount)}</span>` : '—'}</td>
+                            <td><strong>${fmt(o.total)}</strong></td>
+                            <td><span class="badge badge-green">${o.payment_method}</span></td>
+                            <td>${o.note || '—'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+                <tfoot><tr>
+                    <td colspan="4" style="padding:12px 16px;font-weight:700">TOTAL (${data.length} orders)</td>
+                    <td style="padding:12px 16px;font-weight:700;color:var(--amber);font-size:16px">${fmt(total)}</td>
+                    <td colspan="2"></td>
+                </tr></tfoot>
+            </table>
+        `;
     }
 
     // ── COSTS ─────────────────────────────────────────────────────────────────
@@ -823,22 +946,20 @@
     async function loadCostCategories() {
         const data = await api('/api/cost-categories');
         if (!data) return;
-
         const sel = document.getElementById('cost-cat-select');
         sel.innerHTML = '<option value="">Select category</option>' + data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-
         const list = document.getElementById('cost-cats-list');
         list.innerHTML = data.length ? `
-    <div style="display:flex;flex-wrap:wrap;gap:8px">
-      ${data.map(c => `
-        <div style="display:flex;align-items:center;gap:6px;background:var(--gray-50);padding:8px 14px;border-radius:20px;border:2px solid var(--gray-100)">
-          <span class="color-dot" style="background:${c.color}"></span>
-          <span style="font-size:14px;font-weight:500">${c.name}</span>
-          <button class="btn-logout" style="font-size:12px;padding:2px 8px;margin-left:4px" onclick="deleteCostCat('${c.id}')">✕</button>
-        </div>
-      `).join('')}
-    </div>
-  ` : '<div class="empty-state" style="padding:20px">No cost categories yet</div>';
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+                ${data.map(c => `
+                    <div style="display:flex;align-items:center;gap:6px;background:var(--gray-50);padding:8px 14px;border-radius:20px;border:2px solid var(--gray-100)">
+                        <span class="color-dot" style="background:${c.color}"></span>
+                        <span style="font-size:14px;font-weight:500">${c.name}</span>
+                        <button class="btn-logout" style="font-size:12px;padding:2px 8px;margin-left:4px" onclick="deleteCostCat('${c.id}')">✕</button>
+                    </div>
+                `).join('')}
+            </div>
+        ` : '<div class="empty-state" style="padding:20px">No cost categories yet</div>';
     }
 
     async function addCostCategory() {
@@ -860,32 +981,30 @@
         const date = document.getElementById('costs-view-date').value || today();
         const data = await api('/api/costs?date=' + date);
         const list = document.getElementById('costs-list');
-
         if (!data || !data.length) {
             list.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-icon">💸</div>No costs for this date</div>';
             document.getElementById('costs-total').textContent = fmt(0); return;
         }
-
         const total = data.reduce((s,c) => s + parseFloat(c.amount), 0);
         list.innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:8px">
-      ${data.map(c => `
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-100)">
-          <div style="display:flex;align-items:center;gap:8px">
-            ${c.cost_categories ? `<span class="color-dot" style="background:${c.cost_categories.color}"></span>` : ''}
-            <div>
-              <div style="font-weight:600;font-size:14px">${c.description}</div>
-              <div style="font-size:12px;color:var(--gray-400)">${c.cost_categories?.name || 'Uncategorized'}${c.note ? ' · ' + c.note : ''}</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+                ${data.map(c => `
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-100)">
+                        <div style="display:flex;align-items:center;gap:8px">
+                            ${c.cost_categories ? `<span class="color-dot" style="background:${c.cost_categories.color}"></span>` : ''}
+                            <div>
+                                <div style="font-weight:600;font-size:14px">${c.description}</div>
+                                <div style="font-size:12px;color:var(--gray-400)">${c.cost_categories?.name || 'Uncategorized'}${c.note ? ' · ' + c.note : ''}</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <span style="font-weight:700;color:var(--red)">${fmt(c.amount)}</span>
+                            <button class="btn btn-xs btn-red" onclick="deleteCost('${c.id}')">✕</button>
+                        </div>
+                    </div>
+                `).join('')}
             </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <span style="font-weight:700;color:var(--red)">${fmt(c.amount)}</span>
-            <button class="btn btn-xs btn-red" onclick="deleteCost('${c.id}')">✕</button>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
+        `;
         document.getElementById('costs-total').textContent = fmt(total);
     }
 
@@ -895,13 +1014,9 @@
         const cat_id = document.getElementById('cost-cat-select').value;
         const date = document.getElementById('cost-date').value || today();
         const note = document.getElementById('cost-note').value;
-
         if (!desc) { toast('Enter description', 'error'); return; }
         if (!amount || amount <= 0) { toast('Enter valid amount', 'error'); return; }
-
-        await api('/api/costs', { method:'POST', body: JSON.stringify({
-                description: desc, amount, cost_category_id: cat_id || null, date, note
-            })});
+        await api('/api/costs', { method:'POST', body: JSON.stringify({ description: desc, amount, cost_category_id: cat_id || null, date, note }) });
         document.getElementById('cost-desc').value = '';
         document.getElementById('cost-amount').value = '';
         document.getElementById('cost-note').value = '';
@@ -917,30 +1032,27 @@
     async function loadProductsPage() {
         const data = await api('/api/products');
         const cats = await api('/api/categories');
-
         const catSel = document.getElementById('prod-cat');
         catSel.innerHTML = '<option value="">No Category</option>' + (cats || []).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-
         const list = document.getElementById('products-manage-list');
         if (!data || !data.length) { list.innerHTML = '<div class="empty-state">No products yet</div>'; return; }
-
         list.innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto">
-      ${data.map(p => `
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-100)">
-          <div>
-            <div style="font-weight:600;font-size:14px">${p.name}</div>
-            <div style="font-size:12px;color:var(--gray-400)">${p.categories?.name || 'Uncategorized'}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-weight:700;color:var(--amber)">${fmt(p.price)}</span>
-            <button class="btn btn-xs btn-outline" onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&apos;")})'>Edit</button>
-            <button class="btn btn-xs btn-red" onclick="deleteProduct('${p.id}')">✕</button>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
+            <div style="display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto">
+                ${data.map(p => `
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-100)">
+                        <div>
+                            <div style="font-weight:600;font-size:14px">${p.name}</div>
+                            <div style="font-size:12px;color:var(--gray-400)">${p.categories?.name || 'Uncategorized'}</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span style="font-weight:700;color:var(--amber)">${fmt(p.price)}</span>
+                            <button class="btn btn-xs btn-outline" onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&apos;")})'>Edit</button>
+                            <button class="btn btn-xs btn-red" onclick="deleteProduct('${p.id}')">✕</button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
     }
 
     function editProduct(p) {
@@ -966,10 +1078,8 @@
         const price = parseFloat(document.getElementById('prod-price').value);
         const category_id = document.getElementById('prod-cat').value || null;
         const description = document.getElementById('prod-desc').value;
-
         if (!name) { toast('Enter product name', 'error'); return; }
         if (!price || price <= 0) { toast('Enter valid price', 'error'); return; }
-
         const body = JSON.stringify({ name, price, category_id, description });
         if (id) {
             await api('/api/products/' + id, { method:'PUT', body });
@@ -995,18 +1105,18 @@
         const list = document.getElementById('cats-list');
         if (!data || !data.length) { list.innerHTML = '<div class="empty-state">No categories yet</div>'; return; }
         list.innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:8px">
-      ${data.map(c => `
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-100)">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="color-dot" style="background:${c.color}"></span>
-            <span style="font-weight:600;font-size:14px">${c.name}</span>
-          </div>
-          <button class="btn btn-xs btn-red" onclick="deleteCategory('${c.id}')">✕</button>
-        </div>
-      `).join('')}
-    </div>
-  `;
+            <div style="display:flex;flex-direction:column;gap:8px">
+                ${data.map(c => `
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-100)">
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span class="color-dot" style="background:${c.color}"></span>
+                            <span style="font-weight:600;font-size:14px">${c.name}</span>
+                        </div>
+                        <button class="btn btn-xs btn-red" onclick="deleteCategory('${c.id}')">✕</button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
     }
 
     async function addCategory() {
@@ -1038,29 +1148,27 @@
         document.getElementById('d-orders').textContent = data.order_count;
         document.getElementById('d-avg').textContent = fmt(data.avg_order);
 
-        // Orders table
         const wrap = document.getElementById('dash-orders-table');
         if (!data.orders || !data.orders.length) {
             wrap.innerHTML = '<div class="empty-state">No orders today</div>';
         } else {
             wrap.innerHTML = `
-      <table class="data-table">
-        <thead><tr><th>Order #</th><th>Time</th><th>Total</th><th>Payment</th><th>Discount</th></tr></thead>
-        <tbody>
-          ${data.orders.map(o => `
-            <tr>
-              <td><strong>${o.order_number}</strong></td>
-              <td>${new Date(o.created_at).toLocaleTimeString()}</td>
-              <td><strong style="color:var(--amber)">${fmt(o.total)}</strong></td>
-              <td><span class="badge badge-green">${o.payment_method}</span></td>
-              <td>${o.discount_amount > 0 ? fmt(o.discount_amount) : '—'}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
+                <table class="data-table">
+                    <thead><tr><th>Order #</th><th>Time</th><th>Total</th><th>Payment</th><th>Discount</th></tr></thead>
+                    <tbody>
+                        ${data.orders.map(o => `
+                            <tr>
+                                <td><strong>${o.order_number}</strong></td>
+                                <td>${new Date(o.created_at).toLocaleTimeString()}</td>
+                                <td><strong style="color:var(--amber)">${fmt(o.total)}</strong></td>
+                                <td><span class="badge badge-green">${o.payment_method}</span></td>
+                                <td>${o.discount_amount > 0 ? fmt(o.discount_amount) : '—'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
         }
-
         await loadMonthly();
         await loadTopProducts();
     }
@@ -1077,38 +1185,36 @@
         const mpEl = document.getElementById('m-profit');
         mpEl.textContent = fmt(mp); mpEl.className = 'stat-value ' + (mp >= 0 ? 'green' : 'red');
 
-        // Bar chart
         const chartEl = document.getElementById('monthly-chart');
         if (!data.chart_data || !data.chart_data.length) {
             chartEl.innerHTML = '<div class="empty-state" style="padding:20px">No data for this month</div>'; return;
         }
-
         const maxVal = Math.max(...data.chart_data.map(d => Math.max(d.sales, d.costs, 0.1)));
         chartEl.innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto">
-      ${data.chart_data.map(d => `
-        <div>
-          <div style="font-size:11px;color:var(--gray-400);margin-bottom:3px">${d.date.slice(5)}</div>
-          <div class="chart-bar-row" style="margin-bottom:2px">
-            <div class="chart-bar-track" style="flex:1">
-              <div class="chart-bar-fill" style="width:${(d.sales/maxVal*100).toFixed(1)}%;background:var(--amber)"></div>
+            <div style="display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto">
+                ${data.chart_data.map(d => `
+                    <div>
+                        <div style="font-size:11px;color:var(--gray-400);margin-bottom:3px">${d.date.slice(5)}</div>
+                        <div class="chart-bar-row" style="margin-bottom:2px">
+                            <div class="chart-bar-track" style="flex:1">
+                                <div class="chart-bar-fill" style="width:${(d.sales/maxVal*100).toFixed(1)}%;background:var(--amber)"></div>
+                            </div>
+                            <div style="width:80px;font-size:11px;text-align:right;color:var(--amber);font-weight:600">${fmt(d.sales)}</div>
+                        </div>
+                        <div class="chart-bar-row">
+                            <div class="chart-bar-track" style="flex:1">
+                                <div class="chart-bar-fill" style="width:${(d.costs/maxVal*100).toFixed(1)}%;background:var(--red)"></div>
+                            </div>
+                            <div style="width:80px;font-size:11px;text-align:right;color:var(--red);font-weight:600">${fmt(d.costs)}</div>
+                        </div>
+                    </div>
+                `).join('')}
             </div>
-            <div style="width:80px;font-size:11px;text-align:right;color:var(--amber);font-weight:600">${fmt(d.sales)}</div>
-          </div>
-          <div class="chart-bar-row">
-            <div class="chart-bar-track" style="flex:1">
-              <div class="chart-bar-fill" style="width:${(d.costs/maxVal*100).toFixed(1)}%;background:var(--red)"></div>
+            <div style="display:flex;gap:16px;margin-top:12px;font-size:12px">
+                <span><span style="display:inline-block;width:12px;height:12px;background:var(--amber);border-radius:2px;margin-right:4px"></span>Sales</span>
+                <span><span style="display:inline-block;width:12px;height:12px;background:var(--red);border-radius:2px;margin-right:4px"></span>Costs</span>
             </div>
-            <div style="width:80px;font-size:11px;text-align:right;color:var(--red);font-weight:600">${fmt(d.costs)}</div>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-    <div style="display:flex;gap:16px;margin-top:12px;font-size:12px">
-      <span><span style="display:inline-block;width:12px;height:12px;background:var(--amber);border-radius:2px;margin-right:4px"></span>Sales</span>
-      <span><span style="display:inline-block;width:12px;height:12px;background:var(--red);border-radius:2px;margin-right:4px"></span>Costs</span>
-    </div>
-  `;
+        `;
     }
 
     async function loadTopProducts() {
@@ -1117,18 +1223,18 @@
         if (!data || !data.length) { el.innerHTML = '<div class="empty-state">No data</div>'; return; }
         const maxRev = Math.max(...data.map(p => p.revenue));
         el.innerHTML = `
-    <div class="chart-bar-wrap">
-      ${data.map(p => `
-        <div class="chart-bar-row">
-          <div class="chart-bar-label">${p.name.slice(0,10)}</div>
-          <div class="chart-bar-track">
-            <div class="chart-bar-fill" style="width:${(p.revenue/maxRev*100).toFixed(1)}%;background:var(--brown)"></div>
-          </div>
-          <div class="chart-bar-val">${fmt(p.revenue)}</div>
-        </div>
-      `).join('')}
-    </div>
-  `;
+            <div class="chart-bar-wrap">
+                ${data.map(p => `
+                    <div class="chart-bar-row">
+                        <div class="chart-bar-label">${p.name.slice(0,10)}</div>
+                        <div class="chart-bar-track">
+                            <div class="chart-bar-fill" style="width:${(p.revenue/maxRev*100).toFixed(1)}%;background:var(--brown)"></div>
+                        </div>
+                        <div class="chart-bar-val">${fmt(p.revenue)}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
     }
 </script>
 </body>
