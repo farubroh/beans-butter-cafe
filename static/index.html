@@ -172,7 +172,17 @@
         .cart-panel { background: var(--white); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-100); height: fit-content; position: sticky; top: 80px; }
         .cart-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--brown-dark); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
         .cart-items { max-height: 320px; overflow-y: auto; margin-bottom: 16px; }
-        .cart-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--gray-100); }
+        /*.cart-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--gray-100);*/
+
+        /*justify-content: space-between; }*/
+        .cart-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
         .cart-item-name { flex: 1; font-size: 14px; font-weight: 500; }
         .cart-item-price { font-size: 13px; color: var(--gray-400); }
         .qty-ctrl { display: flex; align-items: center; gap: 6px; }
@@ -364,6 +374,34 @@
                         <span>Discount</span><span id="s-discount">-৳0</span>
                     </div>
                     <div class="summary-total"><span>TOTAL</span><span id="s-total">৳0</span></div>
+                    <!-- TABLE SELECTION -->
+                    <div style="margin-bottom:12px">
+                        <div style="font-size:12px;font-weight:600;text-transform:uppercase;
+              letter-spacing:0.5px;color:var(--brown);margin-bottom:8px">
+                            Table
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px" id="table-select">
+                            <!-- rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- MEMBER LOOKUP -->
+                    <div style="margin-bottom:12px">
+                        <div style="font-size:12px;font-weight:600;text-transform:uppercase;
+              letter-spacing:0.5px;color:var(--brown);margin-bottom:8px">
+                            Member (optional)
+                        </div>
+                        <div style="display:flex;gap:6px">
+                            <input type="text" id="member-phone" placeholder="Phone number..."
+                                   style="flex:1;padding:8px 12px;border:2px solid var(--gray-200);
+             border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px"
+                                   oninput="searchMember(this.value)"/>
+                            <button class="btn btn-outline btn-sm" onclick="clearMember()">✕</button>
+                        </div>
+                        <div id="member-info" style="display:none;margin-top:8px;padding:10px 12px;
+       background:var(--gray-50);border-radius:var(--radius);border:2px solid var(--green);font-size:13px">
+                        </div>
+                    </div>
                     <div class="payment-row" style="margin-top:12px">
                         <button class="pay-btn active" id="pay-cash" onclick="setPayment('cash')">💵 Cash</button>
                         <button class="pay-btn" id="pay-card" onclick="setPayment('card')">💳 Card</button>
@@ -388,52 +426,140 @@
     </div>
 
     <!-- COSTS PAGE -->
+    <!-- COSTS PAGE -->
     <div class="page" id="page-costs">
-        <div class="grid-2">
-            <div class="card">
-                <div class="card-title">💸 Add Cost</div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <input type="text" id="cost-desc" placeholder="e.g. Coffee beans, Milk..."/>
+
+        <!-- ADD COST FORM -->
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-title">💸 Add Cost Entry</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;align-items:end">
+
+                <!-- Product Category -->
+                <div class="form-group" style="margin-bottom:0">
+                    <label>Product Category</label>
+                    <select id="cost-cat-select">
+                        <option value="">Select category...</option>
+                    </select>
                 </div>
-                <div class="form-group">
-                    <label>Amount (৳)</label>
-                    <input type="number" id="cost-amount" placeholder="0.00" min="0" step="0.01"/>
+
+                <!-- Vendor -->
+                <div class="form-group" style="margin-bottom:0">
+                    <label>Vendor</label>
+                    <div style="display:flex;gap:6px">
+                        <select id="cost-vendor-select" style="flex:1;padding:12px 16px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:15px;color:var(--brown-dark);background:var(--gray-50)">
+                            <option value="">Select vendor...</option>
+                        </select>
+                        <button class="btn btn-outline btn-sm" onclick="showAddVendor()" title="Add new vendor">+</button>
+                    </div>
+                    <div id="new-vendor-row" style="display:none;margin-top:6px;display:none;gap:6px">
+                        <input type="text" id="new-vendor-input" placeholder="New vendor name..."
+                               style="flex:1;padding:8px 12px;border:2px solid var(--amber);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px"/>
+                        <button class="btn btn-amber btn-sm" onclick="saveNewVendor()">Save</button>
+                        <button class="btn btn-outline btn-sm" onclick="hideAddVendor()">✕</button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Category</label>
-                    <select id="cost-cat-select"><option value="">Select category</option></select>
+
+                <!-- Description / Item name -->
+                <div class="form-group" style="margin-bottom:0">
+                    <label>Item / Description</label>
+                    <input type="text" id="cost-desc" placeholder="e.g. Mint Syrup, Coffee Beans..."/>
                 </div>
-                <div class="form-group">
+
+                <!-- Quantity + Unit -->
+                <div class="form-group" style="margin-bottom:0">
+                    <label>Quantity & Unit</label>
+                    <div style="display:flex;gap:6px">
+                        <input type="number" id="cost-qty" placeholder="Qty" min="0" step="any"
+                               style="width:80px;padding:12px 10px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:15px"
+                               oninput="calcUnitPrice()"/>
+                        <input type="text" id="cost-unit" placeholder="kg/L/pcs"
+                               style="flex:1;padding:12px 10px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:15px"/>
+                    </div>
+                </div>
+
+                <!-- Total Amount -->
+                <div class="form-group" style="margin-bottom:0">
+                    <label>Total Amount (৳)</label>
+                    <input type="number" id="cost-amount" placeholder="0.00" min="0" step="0.01" oninput="calcUnitPrice()"/>
+                </div>
+
+                <!-- Unit Price (auto) -->
+                <div class="form-group" style="margin-bottom:0">
+                    <label>Unit Price (auto)</label>
+                    <input type="text" id="cost-unit-price" placeholder="—" readonly
+                           style="background:var(--gray-100);color:var(--brown);font-weight:600"/>
+                </div>
+
+                <!-- Date -->
+                <div class="form-group" style="margin-bottom:0">
                     <label>Date</label>
                     <input type="date" id="cost-date"/>
                 </div>
-                <div class="form-group">
-                    <label>Note</label>
-                    <input type="text" id="cost-note" placeholder="Optional note..."/>
+
+                <!-- Note -->
+                <div class="form-group" style="margin-bottom:0">
+                    <label>Note (optional)</label>
+                    <input type="text" id="cost-note" placeholder="Any extra info..."/>
                 </div>
-                <button class="btn btn-amber" style="width:100%" onclick="addCost()">+ Add Cost</button>
-            </div>
-            <div class="card">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-                    <div class="card-title" style="margin-bottom:0">Today's Costs</div>
-                    <input type="date" id="costs-view-date" style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif" onchange="loadCosts()"/>
-                </div>
-                <div id="costs-list"><div class="loading">Loading...</div></div>
-                <div style="margin-top:16px;padding-top:16px;border-top:2px solid var(--gray-100);display:flex;justify-content:space-between;font-weight:700;font-size:16px">
-                    <span>Total Cost</span><span id="costs-total" style="color:var(--red)">৳0</span>
+
+                <!-- Submit -->
+                <div style="display:flex;align-items:flex-end">
+                    <button class="btn btn-amber" style="width:100%;padding:13px" onclick="addCost()">+ Add Cost</button>
                 </div>
             </div>
         </div>
 
-        <div class="card" style="margin-top:20px">
-            <div class="card-title">🏷️ Cost Categories</div>
-            <div style="display:flex;gap:10px;margin-bottom:16px">
-                <input type="text" id="new-cost-cat" placeholder="New category name..." style="flex:1;padding:10px 14px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"/>
-                <input type="color" id="new-cost-cat-color" value="#E07B39" style="width:44px;height:44px;border:2px solid var(--gray-200);border-radius:var(--radius);cursor:pointer;padding:2px"/>
-                <button class="btn btn-amber" onclick="addCostCategory()">+ Add</button>
+        <!-- FILTER + VIEW -->
+        <div class="card">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px">
+                <div class="card-title" style="margin-bottom:0;flex:1">📋 Cost Records</div>
+
+                <!-- Date filter -->
+                <input type="date" id="costs-view-date"
+                       style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"
+                       onchange="loadCosts()"/>
+
+                <!-- Category filter -->
+                <select id="costs-filter-cat"
+                        style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"
+                        onchange="loadCosts()">
+                    <option value="">All Categories</option>
+                </select>
+
+                <!-- Vendor filter -->
+                <select id="costs-filter-vendor"
+                        style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"
+                        onchange="loadCosts()">
+                    <option value="">All Vendors</option>
+                </select>
             </div>
-            <div id="cost-cats-list"></div>
+
+            <div id="costs-list"><div class="loading">Loading...</div></div>
+
+            <div style="margin-top:16px;padding-top:16px;border-top:2px solid var(--gray-100);
+                display:flex;justify-content:space-between;font-weight:700;font-size:16px">
+                <span>Total</span>
+                <span id="costs-total" style="color:var(--red)">৳0</span>
+            </div>
+        </div>
+
+        <!-- MANAGE VENDORS & CATEGORIES -->
+        <div class="grid-2" style="margin-top:20px">
+            <div class="card">
+                <div class="card-title">🏪 Vendors</div>
+                <div id="vendors-list"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">🏷️ Cost Categories</div>
+                <div style="display:flex;gap:10px;margin-bottom:16px">
+                    <input type="text" id="new-cost-cat" placeholder="New category..."
+                           style="flex:1;padding:10px 14px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"/>
+                    <input type="color" id="new-cost-cat-color" value="#E07B39"
+                           style="width:44px;height:44px;border:2px solid var(--gray-200);border-radius:var(--radius);cursor:pointer;padding:2px"/>
+                    <button class="btn btn-amber" onclick="addCostCategory()">+ Add</button>
+                </div>
+                <div id="cost-cats-list"></div>
+            </div>
         </div>
     </div>
 
@@ -570,11 +696,30 @@
     let allCategories = [];
     let activeCategory = 'all'; // track active category filter
 
+    const TABLES = [
+        { id: 'table-1', label: 'Table 1', seats: 4, icon: '🪑' },
+        { id: 'table-2', label: 'Table 2', seats: 4, icon: '🪑' },
+        { id: 'table-3', label: 'Table 3', seats: 4, icon: '🪑' },
+        { id: 'table-4', label: 'Bar Stool', seats: 4, icon: '🍺' },
+        { id: 'table-5', label: 'Couple Table', seats: 2, icon: '💑' },
+    ];
+    let selectedTable = null;
+    let activeMember = null;
+
     // ── UTILS ──────────────────────────────────────────────────────────────────
     function fmt(n) { return '৳' + parseFloat(n||0).toLocaleString('en-IN', {minimumFractionDigits:0, maximumFractionDigits:2}); }
-    function today() { return new Date().toISOString().split('T')[0]; }
+    function today() {
+        return new Date().toLocaleDateString('en-CA', {timeZone:'Asia/Dhaka'});
+    }
     function thisMonth() { return new Date().toISOString().slice(0,7); }
 
+    function fmtTime(dateStr) {
+        return new Date(dateStr).toLocaleTimeString('en-GB', {
+            timeZone: 'Asia/Dhaka',
+            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            hour12: false
+        });
+    }
     function toast(msg, type='success') {
         const t = document.getElementById('toast');
         t.textContent = msg; t.className = `show ${type}`;
@@ -646,7 +791,17 @@
         document.getElementById('orders-date').value = today();
         document.getElementById('cost-date').value = today();
         document.getElementById('costs-view-date').value = today();
+        renderTableSelect();
         await loadProductsForOrder();
+    }
+    async function checkoutTable(orderId) {
+        const res = await api('/api/orders/' + orderId + '/checkout', { method: 'POST' });
+        if (res && res.success) {
+            toast('Table checked out!', 'success');
+        } else {
+            toast('Checkout done!', 'success'); // show success regardless
+        }
+        await loadOrders(); // reload to show duration
     }
 
     // ── PRODUCTS FOR ORDER ────────────────────────────────────────────────────
@@ -789,19 +944,19 @@
             return;
         }
         el.innerHTML = cart.map(i => `
-            <div class="cart-item">
-                <div>
-                    <div class="cart-item-name">${i.name}</div>
-                    <div class="cart-item-price">${fmt(i.price)} each</div>
-                </div>
-                <div class="qty-ctrl">
-                    <button class="qty-btn" onclick="updateQty('${i.id}',-1)">−</button>
-                    <span class="qty-num">${i.quantity}</span>
-                    <button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button>
-                </div>
-                <div style="min-width:60px;text-align:right;font-weight:600;font-size:14px">${fmt(i.price * i.quantity)}</div>
-            </div>
-        `).join('');
+    <div class="cart-item">
+        <div>
+            <div class="cart-item-name">${i.name}</div>
+            <div class="cart-item-price">${fmt(i.price)} each</div>
+        </div>
+        <div class="qty-ctrl">
+            <button class="qty-btn" onclick="updateQty('${i.id}',-1)">−</button>
+            <span class="qty-num">${i.quantity}</span>
+            <button class="qty-btn" onclick="updateQty('${i.id}',1)">+</button>
+        </div>
+        <div style="min-width:60px;text-align:right;font-weight:600;font-size:14px">${fmt(i.price * i.quantity)}</div>
+    </div>
+`).join('');
         summary.style.display = 'block';
         recalcTotal();
     }
@@ -840,15 +995,14 @@
 
         const payload = {
             items: cartSnapshot.map(i => ({
-                product_id: i.id,
-                name: i.name,
-                price: i.price,
-                quantity: i.quantity
+                product_id: i.id, name: i.name, price: i.price, quantity: i.quantity
             })),
             discount_type: dtype,
             discount_value: dval,
             payment_method: paymentMethod,
-            note
+            note,
+            table_number: selectedTable,          // ← add this
+            member_id: activeMember?.id || null,  // ← add this
         };
 
         const res = await api('/api/orders', { method:'POST', body: JSON.stringify(payload) });
@@ -906,126 +1060,302 @@
     async function loadOrders() {
         const date = document.getElementById('orders-date').value || today();
         const data = await api('/api/orders?date=' + date);
+        console.log('First order:', data?.[0]); // ← CHECK THIS in DevTools
         const wrap = document.getElementById('orders-table-wrap');
         if (!data || !data.length) {
             wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>No orders for this date</div>';
             return;
         }
-        const total = data.reduce((s,o) => s + parseFloat(o.total), 0);
+
+        // ── SUMMARY CALCULATIONS ──
+        const totalSale     = data.reduce((s,o) => s + parseFloat(o.total), 0);
+        const totalDiscount = data.reduce((s,o) => s + parseFloat(o.discount_amount || 0), 0);
+        const totalCash     = data.filter(o => o.payment_method === 'cash').reduce((s,o) => s + parseFloat(o.total), 0);
+        const totalCard     = data.filter(o => o.payment_method === 'card').reduce((s,o) => s + parseFloat(o.total), 0);
+        const totalMobile   = data.filter(o => o.payment_method === 'mobile').reduce((s,o) => s + parseFloat(o.total), 0);
+        const countCash     = data.filter(o => o.payment_method === 'cash').length;
+        const countCard     = data.filter(o => o.payment_method === 'card').length;
+        const countMobile   = data.filter(o => o.payment_method === 'mobile').length;
+
         wrap.innerHTML = `
-            <table class="data-table">
-                <thead><tr><th>Order #</th><th>Time</th><th>Subtotal</th><th>Discount</th><th>Total</th><th>Payment</th><th>Note</th></tr></thead>
-                <tbody>
-                    ${data.map(o => `
+        <!-- SUMMARY CANVAS -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:24px">
+            <div style="background:linear-gradient(135deg,#2C1810,#6F4E37);border-radius:var(--radius-lg);padding:16px 20px;color:white">
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;opacity:0.75;margin-bottom:6px">Total Sales</div>
+                <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700">${fmt(totalSale)}</div>
+                <div style="font-size:11px;opacity:0.65;margin-top:4px">${data.length} orders</div>
+            </div>
+            <div style="background:linear-gradient(135deg,#C0392B,#e74c3c);border-radius:var(--radius-lg);padding:16px 20px;color:white">
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;opacity:0.75;margin-bottom:6px">Total Discount</div>
+                <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700">${fmt(totalDiscount)}</div>
+                <div style="font-size:11px;opacity:0.65;margin-top:4px">given away</div>
+            </div>
+            <div style="background:linear-gradient(135deg,#1a6b3a,#2E7D50);border-radius:var(--radius-lg);padding:16px 20px;color:white">
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;opacity:0.75;margin-bottom:6px">💵 Cash</div>
+                <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700">${fmt(totalCash)}</div>
+                <div style="font-size:11px;opacity:0.65;margin-top:4px">${countCash} orders</div>
+            </div>
+            <div style="background:linear-gradient(135deg,#1a4a8a,#2563eb);border-radius:var(--radius-lg);padding:16px 20px;color:white">
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;opacity:0.75;margin-bottom:6px">💳 Card</div>
+                <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700">${fmt(totalCard)}</div>
+                <div style="font-size:11px;opacity:0.65;margin-top:4px">${countCard} orders</div>
+            </div>
+            <div style="background:linear-gradient(135deg,#7b3fa0,#9b59b6);border-radius:var(--radius-lg);padding:16px 20px;color:white">
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;opacity:0.75;margin-bottom:6px">📱 Mobile</div>
+                <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700">${fmt(totalMobile)}</div>
+                <div style="font-size:11px;opacity:0.65;margin-top:4px">${countMobile} orders</div>
+            </div>
+        </div>
+
+        <!-- ORDERS TABLE -->
+        <table class="data-table">
+            <thead><tr>
+                <th>Order #</th><th>Table</th><th>Seated</th>
+                <th>Subtotal</th><th>Discount</th><th>Total</th>
+                <th>Payment</th><th>Note</th><th>Duration</th>
+            </tr></thead>
+            <tbody>
+                ${data.map(o => {
+            const tableInfo = TABLES.find(t => t.id === o.table_number);
+            const seatedAt  = new Date(o.created_at);
+            const leftAt    = o.left_at ? new Date(o.left_at) : null;
+            const mins      = leftAt ? Math.round((leftAt - seatedAt) / 60000) : null;
+            return `
                         <tr>
                             <td><strong>${o.order_number}</strong></td>
-                            <td>${new Date(o.created_at).toLocaleTimeString()}</td>
+                            <td>${tableInfo
+                ? `<span class="badge badge-amber">${tableInfo.icon} ${tableInfo.label}</span>`
+                : '<span style="color:var(--gray-400)">—</span>'}</td>
+                            <td style="font-size:13px">${fmtTime(o.created_at)}</td>
                             <td>${fmt(o.subtotal)}</td>
-                            <td>${o.discount_amount > 0 ? `<span style="color:var(--red)">-${fmt(o.discount_amount)}</span>` : '—'}</td>
+                            <td>${parseFloat(o.discount_amount||0) > 0
+                ? `<span style="color:var(--red);font-weight:600">-${fmt(o.discount_amount)}</span>`
+                : '—'}</td>
                             <td><strong>${fmt(o.total)}</strong></td>
                             <td><span class="badge badge-green">${o.payment_method}</span></td>
-                            <td>${o.note || '—'}</td>
+                            <td style="font-size:13px;color:var(--gray-600)">${o.note || '—'}</td>
+                            <td>
+                                ${!o.left_at
+                ? `<button class="btn btn-xs btn-amber" onclick="checkoutTable('${o.id}')">Checkout</button>`
+                : `<div style="text-align:center">
+                                         <div style="font-size:12px;color:var(--green);font-weight:700">✓ ${mins}m</div>
+                                         <div style="font-size:10px;color:var(--gray-400)">${fmtTime(o.left_at)}</div>
+                                       </div>`
+            }
+                            </td>
                         </tr>
-                    `).join('')}
-                </tbody>
-                <tfoot><tr>
-                    <td colspan="4" style="padding:12px 16px;font-weight:700">TOTAL (${data.length} orders)</td>
-                    <td style="padding:12px 16px;font-weight:700;color:var(--amber);font-size:16px">${fmt(total)}</td>
-                    <td colspan="2"></td>
-                </tr></tfoot>
-            </table>
-        `;
+                    `;
+        }).join('')}
+            </tbody>
+            <tfoot><tr>
+                <td colspan="4" style="padding:12px 16px;font-weight:700">TOTAL (${data.length} orders)</td>
+                <td style="padding:12px 16px;font-weight:700;color:var(--red)">-${fmt(totalDiscount)}</td>
+                <td style="padding:12px 16px;font-weight:700;color:var(--amber);font-size:16px">${fmt(totalSale)}</td>
+                <td colspan="3"></td>
+            </tr></tfoot>
+        </table>
+    `;
     }
 
     // ── COSTS ─────────────────────────────────────────────────────────────────
     async function loadCostPage() {
-        await loadCostCategories();
+        await Promise.all([loadCostCategories(), loadVendors()]);
         await loadCosts();
     }
+
+    async function loadVendors() {
+        const data = await api('/api/vendors');
+        if (!data) return;
+
+        // Populate vendor dropdowns
+        const opts = data.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+        document.getElementById('cost-vendor-select').innerHTML =
+            '<option value="">Select vendor...</option>' + opts;
+        const filterVendor = document.getElementById('costs-filter-vendor');
+        if (filterVendor) filterVendor.innerHTML = '<option value="">All Vendors</option>' + opts;
+
+        // Vendors management list
+        const list = document.getElementById('vendors-list');
+        if (list) {
+            list.innerHTML = data.length ? `
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${data.map(v => `
+          <div style="display:flex;align-items:center;gap:6px;background:var(--gray-50);
+                      padding:8px 14px;border-radius:20px;border:2px solid var(--gray-100)">
+            <span style="font-size:14px;font-weight:500">🏪 ${v.name}</span>
+            <button class="btn-logout" style="font-size:12px;padding:2px 8px;margin-left:4px"
+              onclick="deleteVendor('${v.id}')">✕</button>
+          </div>`).join('')}
+      </div>` : '<div class="empty-state" style="padding:20px">No vendors yet</div>';
+        }
+    }
+
+    function showAddVendor() {
+        const row = document.getElementById('new-vendor-row');
+        row.style.display = 'flex';
+        document.getElementById('new-vendor-input').focus();
+    }
+    function hideAddVendor() {
+        document.getElementById('new-vendor-row').style.display = 'none';
+        document.getElementById('new-vendor-input').value = '';
+    }
+    async function saveNewVendor() {
+        const name = document.getElementById('new-vendor-input').value.trim();
+        if (!name) { toast('Enter vendor name', 'error'); return; }
+        await api('/api/vendors', { method: 'POST', body: JSON.stringify({ name }) });
+        hideAddVendor();
+        toast('Vendor added!');
+        await loadVendors();
+    }
+    async function deleteVendor(id) {
+        await api('/api/vendors/' + id, { method: 'DELETE' });
+        toast('Vendor deleted');
+        await loadVendors();
+    }
+
+    function calcUnitPrice() {
+        const total = parseFloat(document.getElementById('cost-amount').value) || 0;
+        const qty   = parseFloat(document.getElementById('cost-qty').value) || 0;
+        const el    = document.getElementById('cost-unit-price');
+        if (total > 0 && qty > 0) {
+            el.value = '৳' + (total / qty).toFixed(2) + ' / ' + (document.getElementById('cost-unit').value || 'unit');
+        } else {
+            el.value = '—';
+        }
+    }
+
 
     async function loadCostCategories() {
         const data = await api('/api/cost-categories');
         if (!data) return;
-        const sel = document.getElementById('cost-cat-select');
-        sel.innerHTML = '<option value="">Select category</option>' + data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        const list = document.getElementById('cost-cats-list');
-        list.innerHTML = data.length ? `
-            <div style="display:flex;flex-wrap:wrap;gap:8px">
-                ${data.map(c => `
-                    <div style="display:flex;align-items:center;gap:6px;background:var(--gray-50);padding:8px 14px;border-radius:20px;border:2px solid var(--gray-100)">
-                        <span class="color-dot" style="background:${c.color}"></span>
-                        <span style="font-size:14px;font-weight:500">${c.name}</span>
-                        <button class="btn-logout" style="font-size:12px;padding:2px 8px;margin-left:4px" onclick="deleteCostCat('${c.id}')">✕</button>
-                    </div>
-                `).join('')}
-            </div>
-        ` : '<div class="empty-state" style="padding:20px">No cost categories yet</div>';
-    }
+        const opts = data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        document.getElementById('cost-cat-select').innerHTML =
+            '<option value="">Select category...</option>' + opts;
+        const filterCat = document.getElementById('costs-filter-cat');
+        if (filterCat) filterCat.innerHTML = '<option value="">All Categories</option>' + opts;
 
+        const list = document.getElementById('cost-cats-list');
+        if (list) {
+            list.innerHTML = data.length ? `
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${data.map(c => `
+          <div style="display:flex;align-items:center;gap:6px;background:var(--gray-50);
+                      padding:8px 14px;border-radius:20px;border:2px solid var(--gray-100)">
+            <span class="color-dot" style="background:${c.color}"></span>
+            <span style="font-size:14px;font-weight:500">${c.name}</span>
+            <button class="btn-logout" style="font-size:12px;padding:2px 8px;margin-left:4px"
+              onclick="deleteCostCat('${c.id}')">✕</button>
+          </div>`).join('')}
+      </div>` : '<div class="empty-state" style="padding:20px">No categories yet</div>';
+        }
+    }
     async function addCostCategory() {
-        const name = document.getElementById('new-cost-cat').value.trim();
+        const name  = document.getElementById('new-cost-cat').value.trim();
         const color = document.getElementById('new-cost-cat-color').value;
         if (!name) { toast('Enter category name', 'error'); return; }
-        await api('/api/cost-categories', { method:'POST', body: JSON.stringify({name, color}) });
+        await api('/api/cost-categories', { method: 'POST', body: JSON.stringify({ name, color }) });
         document.getElementById('new-cost-cat').value = '';
         toast('Category added!');
         await loadCostCategories();
     }
 
     async function deleteCostCat(id) {
-        await api('/api/cost-categories/' + id, { method:'DELETE' });
-        toast('Deleted'); await loadCostCategories();
+        await api('/api/cost-categories/' + id, { method: 'DELETE' });
+        toast('Deleted');
+        await loadCostCategories();
     }
-
     async function loadCosts() {
-        const date = document.getElementById('costs-view-date').value || today();
-        const data = await api('/api/costs?date=' + date);
+        const date      = document.getElementById('costs-view-date').value || today();
+        const catId     = document.getElementById('costs-filter-cat')?.value || '';
+        const vendorId  = document.getElementById('costs-filter-vendor')?.value || '';
+
+        let url = '/api/costs?date=' + date;
+        if (catId)    url += '&cat=' + catId;
+        if (vendorId) url += '&vendor=' + vendorId;
+
+        const data = await api(url);
         const list = document.getElementById('costs-list');
+
         if (!data || !data.length) {
             list.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-icon">💸</div>No costs for this date</div>';
-            document.getElementById('costs-total').textContent = fmt(0); return;
+            document.getElementById('costs-total').textContent = fmt(0);
+            return;
         }
-        const total = data.reduce((s,c) => s + parseFloat(c.amount), 0);
+
+        const total = data.reduce((s, c) => s + parseFloat(c.amount), 0);
+
         list.innerHTML = `
-            <div style="display:flex;flex-direction:column;gap:8px">
-                ${data.map(c => `
-                    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gray-50);border-radius:var(--radius);border:1px solid var(--gray-100)">
-                        <div style="display:flex;align-items:center;gap:8px">
-                            ${c.cost_categories ? `<span class="color-dot" style="background:${c.cost_categories.color}"></span>` : ''}
-                            <div>
-                                <div style="font-weight:600;font-size:14px">${c.description}</div>
-                                <div style="font-size:12px;color:var(--gray-400)">${c.cost_categories?.name || 'Uncategorized'}${c.note ? ' · ' + c.note : ''}</div>
-                            </div>
-                        </div>
-                        <div style="display:flex;align-items:center;gap:10px">
-                            <span style="font-weight:700;color:var(--red)">${fmt(c.amount)}</span>
-                            <button class="btn btn-xs btn-red" onclick="deleteCost('${c.id}')">✕</button>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
+    <table class="data-table">
+      <thead><tr>
+        <th>Category</th><th>Vendor</th><th>Item</th>
+        <th>Qty</th><th>Unit Price</th><th>Total</th><th>Note</th><th></th>
+      </tr></thead>
+      <tbody>
+        ${data.map(c => `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:6px">
+                ${c.cost_categories ? `<span class="color-dot" style="background:${c.cost_categories.color}"></span>` : ''}
+                <span style="font-size:13px">${c.cost_categories?.name || '—'}</span>
+              </div>
+            </td>
+            <td style="font-size:13px;font-weight:600">${c.vendor_name || '—'}</td>
+            <td style="font-weight:500">${c.description}</td>
+            <td style="font-size:13px">${c.quantity > 0 ? c.quantity + ' ' + (c.unit || '') : '—'}</td>
+            <td style="font-size:13px;color:var(--brown)">${c.quantity > 0 && c.unit_price > 0 ? fmt(c.unit_price) : '—'}</td>
+            <td><strong style="color:var(--red)">${fmt(c.amount)}</strong></td>
+            <td style="font-size:12px;color:var(--gray-400)">${c.note || '—'}</td>
+            <td><button class="btn btn-xs btn-red" onclick="deleteCost('${c.id}')">✕</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+
         document.getElementById('costs-total').textContent = fmt(total);
     }
 
     async function addCost() {
-        const desc = document.getElementById('cost-desc').value.trim();
-        const amount = parseFloat(document.getElementById('cost-amount').value);
-        const cat_id = document.getElementById('cost-cat-select').value;
-        const date = document.getElementById('cost-date').value || today();
-        const note = document.getElementById('cost-note').value;
-        if (!desc) { toast('Enter description', 'error'); return; }
+        const desc     = document.getElementById('cost-desc').value.trim();
+        const amount   = parseFloat(document.getElementById('cost-amount').value);
+        const qty      = parseFloat(document.getElementById('cost-qty').value) || 0;
+        const unit     = document.getElementById('cost-unit').value.trim();
+        const cat_id   = document.getElementById('cost-cat-select').value;
+        const vendor_id= document.getElementById('cost-vendor-select').value;
+        const date     = document.getElementById('cost-date').value || today();
+        const note     = document.getElementById('cost-note').value;
+
+        if (!desc)             { toast('Enter item description', 'error'); return; }
         if (!amount || amount <= 0) { toast('Enter valid amount', 'error'); return; }
-        await api('/api/costs', { method:'POST', body: JSON.stringify({ description: desc, amount, cost_category_id: cat_id || null, date, note }) });
-        document.getElementById('cost-desc').value = '';
+
+        // Get vendor name for denormalized storage (easier querying)
+        const vendorSel = document.getElementById('cost-vendor-select');
+        const vendor_name = vendorSel.options[vendorSel.selectedIndex]?.text || '';
+
+        const unit_price = (qty > 0) ? (amount / qty) : 0;
+
+        await api('/api/costs', { method: 'POST', body: JSON.stringify({
+                description: desc, amount, quantity: qty || 1, unit,
+                unit_price, cost_category_id: cat_id || null,
+                vendor_id: vendor_id || null,
+                vendor_name: vendor_id ? vendor_name : '',
+                date, note
+            })});
+
+        // Reset form fields (keep date, category, vendor for quick multi-entry)
+        document.getElementById('cost-desc').value   = '';
         document.getElementById('cost-amount').value = '';
-        document.getElementById('cost-note').value = '';
-        toast('Cost added!'); await loadCosts();
+        document.getElementById('cost-qty').value    = '';
+        document.getElementById('cost-unit').value   = '';
+        document.getElementById('cost-unit-price').value = '—';
+        document.getElementById('cost-note').value   = '';
+
+        toast('Cost added!');
+        await loadCosts();
     }
 
     async function deleteCost(id) {
-        await api('/api/costs/' + id, { method:'DELETE' });
-        toast('Deleted'); await loadCosts();
+        await api('/api/costs/' + id, { method: 'DELETE' });
+        toast('Deleted');
+        await loadCosts();
     }
 
     // ── PRODUCTS MANAGEMENT ───────────────────────────────────────────────────
@@ -1215,6 +1545,90 @@
                 <span><span style="display:inline-block;width:12px;height:12px;background:var(--red);border-radius:2px;margin-right:4px"></span>Costs</span>
             </div>
         `;
+    }
+    function renderTableSelect() {
+        document.getElementById('table-select').innerHTML = TABLES.map(t => `
+    <button onclick="selectTable('${t.id}')"
+      id="tbtn-${t.id}"
+      style="padding:8px 4px;border-radius:var(--radius);border:2px solid var(--gray-200);
+             background:var(--white);cursor:pointer;font-size:12px;font-weight:500;
+             color:var(--brown);font-family:'DM Sans',sans-serif;transition:all 0.15s;
+             display:flex;flex-direction:column;align-items:center;gap:2px">
+      <span style="font-size:16px">${t.icon}</span>
+      <span>${t.label}</span>
+      <span style="font-size:10px;color:var(--gray-400)">${t.seats} seats</span>
+    </button>
+  `).join('');
+    }
+
+    function selectTable(id) {
+        selectedTable = id;
+        TABLES.forEach(t => {
+            const btn = document.getElementById('tbtn-' + t.id);
+            if (!btn) return;
+            btn.style.background    = t.id === id ? 'var(--brown-dark)' : 'var(--white)';
+            btn.style.color         = t.id === id ? 'var(--white)'      : 'var(--brown)';
+            btn.style.borderColor   = t.id === id ? 'var(--brown-dark)' : 'var(--gray-200)';
+        });
+    }
+
+    let memberSearchTimer = null;
+    async function searchMember(phone) {
+        clearTimeout(memberSearchTimer);
+        if (phone.length < 6) { clearMember(); return; }
+        memberSearchTimer = setTimeout(async () => {
+            const res = await api('/api/members?phone=' + encodeURIComponent(phone));
+            if (res && res.id) {
+                activeMember = res;
+                const infoEl = document.getElementById('member-info');
+                infoEl.style.display = 'block';
+                infoEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:700;color:var(--brown-dark)">✅ ${res.name || 'Member'}</div>
+            <div style="color:var(--gray-400);margin-top:2px">
+              ${res.total_visits} visits · ${fmt(res.total_spent)} spent
+            </div>
+          </div>
+          ${res.discount_value > 0 ? `
+            <div style="background:#E8F5EE;color:var(--green);padding:4px 10px;
+                        border-radius:20px;font-size:12px;font-weight:700">
+              ${res.discount_type === 'percent' ? res.discount_value + '%' : fmt(res.discount_value)} OFF
+            </div>` : ''}
+        </div>
+      `;
+                // Auto-apply member discount
+                if (res.discount_value > 0) {
+                    document.getElementById('discount-type').value = res.discount_type;
+                    document.getElementById('discount-val').value  = res.discount_value;
+                    recalcTotal();
+                }
+            } else {
+                activeMember = null;
+                const infoEl = document.getElementById('member-info');
+                infoEl.style.display = 'block';
+                infoEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="color:var(--gray-400)">No member found</span>
+          <button class="btn btn-xs btn-green" onclick="quickAddMember('${phone}')">+ Add Member</button>
+        </div>`;
+            }
+        }, 400);
+    }
+
+    function clearMember() {
+        activeMember = null;
+        document.getElementById('member-phone').value = '';
+        document.getElementById('member-info').style.display = 'none';
+    }
+
+    async function quickAddMember(phone) {
+        const name = prompt('Member name (optional):') || '';
+        const res = await api('/api/members', {
+            method: 'POST',
+            body: JSON.stringify({ phone, name, discount_type: 'percent', discount_value: 0 })
+        });
+        if (res && res.id) { toast('Member added!'); searchMember(phone); }
     }
 
     async function loadTopProducts() {
