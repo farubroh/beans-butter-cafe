@@ -21,7 +21,6 @@ DHAKA = timezone(timedelta(hours=6))
 
 
 def dhaka_date_of(utc_str):
-    """Convert a UTC timestamp string from Supabase to a Dhaka date string YYYY-MM-DD."""
     utc_str = utc_str.replace(' ', 'T')
     if utc_str.endswith('+00'):
         utc_str += ':00'
@@ -35,7 +34,6 @@ def utc_window_for_dhaka_date(date_filter):
     y, m, d = map(int, date_filter.split('-'))
     dhaka_start = datetime(y, m, d, 0, 0, 0, tzinfo=DHAKA)
     dhaka_end   = datetime(y, m, d, 23, 59, 59, tzinfo=DHAKA)
-    # Use Z suffix (UTC) — no special characters that get URL-encoded
     utc_start = dhaka_start.astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     utc_end   = dhaka_end.astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     return utc_start, utc_end
@@ -60,7 +58,6 @@ def sb_delete(table, id_val):
     r = httpx.delete(url, headers=HEADERS)
     return r.status_code
 
-# ── SERVE FRONTEND ────────────────────────────────────────────────────────────
 @app.route('/')
 def index():
     return send_from_directory('static', 'index.html')
@@ -69,7 +66,6 @@ def index():
 def static_files(path):
     return send_from_directory('static', path)
 
-# ── AUTH ──────────────────────────────────────────────────────────────────────
 @app.route('/api/login', methods=['POST'])
 def login():
     body = request.json
@@ -79,7 +75,6 @@ def login():
         return jsonify({'success': True, 'user': user})
     return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
 
-# ── CATEGORIES ────────────────────────────────────────────────────────────────
 @app.route('/api/categories', methods=['GET'])
 def get_categories():
     return jsonify(sb_get('categories', 'order=name'))
@@ -99,7 +94,6 @@ def delete_category(cat_id):
     sb_delete('categories', cat_id)
     return jsonify({'success': True})
 
-# ── PRODUCTS ──────────────────────────────────────────────────────────────────
 @app.route('/api/products', methods=['GET'])
 def get_products():
     data = sb_get('products', 'active=eq.true&order=name&select=*,categories(name,color)')
@@ -120,7 +114,6 @@ def delete_product(prod_id):
     sb_patch('products', prod_id, {'active': False})
     return jsonify({'success': True})
 
-# ── ORDERS ────────────────────────────────────────────────────────────────────
 @app.route('/api/orders', methods=['POST'])
 def create_order():
     data = request.json
@@ -187,7 +180,6 @@ def get_orders():
                         f"&created_at=lte.{utc_end}"
                         f"&order=created_at.desc")
 
-    # Filter again in Python using Dhaka date to be 100% accurate
     filtered = [o for o in (all_orders or [])
                 if dhaka_date_of(o['created_at']) == date_filter]
 
@@ -199,7 +191,6 @@ def checkout_order(order_id):
     sb_patch('orders', order_id, {'left_at': datetime.now(DHAKA).isoformat()})
     return jsonify({'success': True})
 
-# ── MEMBERS ───────────────────────────────────────────────────────────────────
 @app.route('/api/members', methods=['GET'])
 def get_member():
     phone = request.args.get('phone', '')
@@ -218,7 +209,6 @@ def add_member():
 def get_order_items(order_id):
     return jsonify(sb_get('order_items', f"order_id=eq.{order_id}"))
 
-# ── COST CATEGORIES ───────────────────────────────────────────────────────────
 @app.route('/api/cost-categories', methods=['GET'])
 def get_cost_categories():
     return jsonify(sb_get('cost_categories', 'order=name'))
@@ -233,7 +223,6 @@ def delete_cost_category(cat_id):
     sb_delete('cost_categories', cat_id)
     return jsonify({'success': True})
 
-# ── DAILY COSTS ───────────────────────────────────────────────────────────────
 @app.route('/api/costs', methods=['GET'])
 def get_costs():
     date_filter = request.args.get('date', datetime.now(DHAKA).strftime('%Y-%m-%d'))
@@ -257,7 +246,6 @@ def delete_cost(cost_id):
     sb_delete('daily_costs', cost_id)
     return jsonify({'success': True})
 
-# ── DASHBOARD / ANALYTICS ─────────────────────────────────────────────────────
 @app.route('/api/dashboard/daily', methods=['GET'])
 def dashboard_daily():
     date_filter = request.args.get('date', datetime.now(DHAKA).strftime('%Y-%m-%d'))
@@ -364,7 +352,6 @@ def top_products():
     return jsonify(top)
 
 
-# ── DEBUG ─────────────────────────────────────────────────────────────────────
 @app.route('/api/debug', methods=['GET'])
 def debug():
     now = datetime.now(DHAKA)
@@ -388,7 +375,6 @@ def debug():
         'orders_found': parsed
     })
 
-# ── VENDORS ───────────────────────────────────────────────────────────────────
 @app.route('/api/vendors', methods=['GET'])
 def get_vendors():
     return jsonify(sb_get('vendors', 'order=name'))
@@ -406,3 +392,4 @@ def delete_vendor(vendor_id):
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+
