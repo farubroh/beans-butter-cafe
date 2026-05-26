@@ -12,7 +12,7 @@
 <!-- ══════════════════════════════════════════════
      LOGIN page
 ══════════════════════════════════════════════ -->
-<div id="login-screen">
+<div id="login-screen" style="display:none">
     <div class="login-card">
         <div class="login-logo">
             <h1>Beans &amp; Butter</h1>
@@ -140,7 +140,7 @@
             <div class="order-layout">
                 <div>
                     <div class="search-wrap">
-                        <span class="search-icon">🔍</span>
+                        <span class="search-icon"><i class="ti ti-search" aria-hidden="true"></i></span>
                         <input type="text" id="product-search" placeholder="Search products by name..."
                                oninput="handleSearch(this.value)" autocomplete="off"/>
                         <button class="clear-search" id="clear-search-btn" onclick="clearSearch()" title="Clear search">✕</button>
@@ -158,7 +158,7 @@
                         <button class="btn btn-outline btn-xs" onclick="clearCart()">Clear</button>
                     </div>
                     <div class="cart-items" id="cart-items">
-                        <div class="cart-empty">☕ Add items to order</div>
+                        <div class="cart-empty">Add items to order</div>
                     </div>
                     <div class="cart-summary" id="cart-summary" style="display:none">
                         <div class="summary-row"><span>Subtotal</span><span id="s-subtotal">৳0</span></div>
@@ -193,8 +193,8 @@
 
                         <div class="payment-row">
                             <button class="pay-btn active" id="pay-cash"   onclick="setPayment('cash')">💵 Cash</button>
-                            <button class="pay-btn"         id="pay-card"   onclick="setPayment('card')">💳 Card</button>
-                            <button class="pay-btn"         id="pay-mobile" onclick="setPayment('mobile')">📱 Mobile</button>
+                            <button class="pay-btn"        id="pay-card"   onclick="setPayment('card')">💳 Card</button>
+                            <button class="pay-btn"        id="pay-mobile" onclick="setPayment('mobile')">📱 Mobile</button>
                         </div>
 
                         <input type="text" id="order-note" placeholder="Note (optional)"/>
@@ -208,10 +208,7 @@
         <div class="page" id="page-orders-list">
             <div class="card">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-                    <div class="card-title" style="margin-bottom:0">
-                        <i class="ti ti-clipboard-list" style="font-size:18px;vertical-align:-3px;margin-right:6px;color:var(--amber)"></i>
-                        Orders History
-                    </div>
+                    <div class="card-title" style="margin-bottom:0">Orders History</div>
                     <input type="date" id="orders-date" onchange="loadOrders()"/>
                 </div>
                 <div id="orders-table-wrap"><div class="loading">Loading...</div></div>
@@ -221,7 +218,7 @@
         <!-- TAB 3: DAILY COSTS -->
         <div class="page" id="page-costs">
             <div class="card" style="margin-bottom:18px">
-                <div class="card-title"> Add Cost Entry</div>
+                <div class="card-title">Add Cost Entry</div>
                 <div class="steps-bar">
                     <div class="step-item">
                         <div class="step-circle active" id="sc1">1</div>
@@ -276,45 +273,13 @@
                 background:var(--bg-surface2);
             "></div>
                         </div>
-
-                        <!-- RIGHT: search + add -->
-                        <div style="display:flex;flex-direction:column;gap:10px">
-                            <div>
-                                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--text-muted);margin-bottom:8px">
-                                    Search
-                                </div>
-                                <div class="item-search-wrap">
-                                    <span class="s-icon">🔍</span>
-                                    <input type="text" id="item-search" placeholder="Type to filter items..."
-                                           oninput="searchItems(this.value)" autocomplete="off"/>
-                                    <button class="item-clear-btn" id="item-clear-btn" onclick="clearItemSearch()">✕</button>
-                                    <button class="btn btn-amber btn-xs" id="inline-add-btn"
-                                            style="display:none;white-space:nowrap;margin-right:4px"
-                                            onclick="openAddItemModal(document.getElementById('item-search').value.trim())">
-                                        + Add
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- misc cat chips (for Other vendor) -->
-                            <div id="misc-cats-wrap" style="display:none">
-                                <div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Quick Filter</div>
-                                <div class="misc-cats" id="misc-cats">
-                                    <button class="misc-cat-chip" onclick="setMiscCat(this,'kitchen')">🍳 Kitchen</button>
-                                    <button class="misc-cat-chip" onclick="setMiscCat(this,'decor')">🎨 Decor</button>
-                                    <button class="misc-cat-chip" onclick="setMiscCat(this,'salary')">👤 HR</button>
-                                    <button class="misc-cat-chip" onclick="setMiscCat(this,'rent')">🏠 Rent</button>
-                                    <button class="misc-cat-chip" onclick="setMiscCat(this,'transport')">🚗 Transport</button>
-                                    <button class="misc-cat-chip" onclick="setMiscCat(this,'utility')">💡 Utility</button>
-                                    <button class="misc-cat-chip" onclick="setMiscCat(this,'charity')">🤲 Charity</button>
-                                    <button class="misc-cat-chip" onclick="setMiscCat(this,'other')">📦 Other</button>
-                                </div>
-                            </div>
-
-<!--                            &lt;!&ndash; add new item button &ndash;&gt;-->
-<!--                            <button class="btn btn-outline" style="margin-top:auto" onclick="openAddItemModal('')">-->
-<!--                                <i class="ti ti-plus" style="margin-right:6px"></i>Add New Item-->
-<!--                            </button>-->
+                    </div>
+                    <div id="product-search-section">
+                        <div class="item-search-wrap">
+                            <span class="s-icon"><i class="ti ti-search" aria-hidden="true"></i></span>
+                            <input type="text" id="item-search" placeholder="Search items for this vendor..."
+                                   oninput="searchItems(this.value)" autocomplete="off"/>
+                            <button class="item-clear-btn" id="item-clear-btn" onclick="clearItemSearch()">✕</button>
                         </div>
                     </div>
 
@@ -368,7 +333,7 @@
 
             <div class="card">
                 <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px">
-                    <div class="card-title" style="margin-bottom:0;flex:1"> Cost Records</div>
+                    <div class="card-title" style="margin-bottom:0;flex:1">Cost Records</div>
                     <input type="date" id="costs-view-date" onchange="loadCosts()"/>
                     <select id="costs-filter-cat" onchange="loadCosts()">
                         <option value="">All Categories</option>
@@ -441,7 +406,7 @@
         <div class="page" id="page-categories">
             <div class="grid-2">
                 <div class="card">
-                    <div class="card-title">🏷️ Add Product Category</div>
+                    <div class="card-title">Add Product Category</div>
                     <div class="form-group">
                         <label>Category Name</label>
                         <input type="text" id="new-cat-name" placeholder="e.g. Beverages"/>
@@ -529,10 +494,10 @@
 <!-- ── Sidebar & topbar wiring ── -->
 <script>
     /* Topbar: show current date */
-    (function(){
+    (function () {
         const d = new Date();
         const el = document.getElementById('topbar-date');
-        if(el) el.textContent = d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+        if (el) el.textContent = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
     })();
 
     /* Page title sync */
@@ -545,46 +510,24 @@
         'dashboard':   'Dashboard'
     };
 
-    /* Sidebar avatar initials from username */
-    function updateSidebarAvatar(username){
-        const el = document.getElementById('sidebar-avatar');
-        if(el && username){
-            el.textContent = username.slice(0,2).toUpperCase();
-        }
-    }
-
     /* Intercept nav-tab clicks to update topbar title */
-    document.addEventListener('click', function(e){
+    document.addEventListener('click', function (e) {
         const tab = e.target.closest('.nav-tab[data-page]');
-        if(tab){
+        if (tab) {
             const page = tab.getAttribute('data-page');
             const titleEl = document.getElementById('topbar-page-title');
-            if(titleEl && PAGE_TITLES[page]) titleEl.textContent = PAGE_TITLES[page];
+            if (titleEl && PAGE_TITLES[page]) titleEl.textContent = PAGE_TITLES[page];
             /* close sidebar on mobile */
-            if(window.innerWidth < 768){
+            if (window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.remove('open');
             }
         }
     });
 
     /* Mobile hamburger */
-    function toggleSidebar(){
+    function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('open');
     }
-
-    /* Patch doLogin to also update avatar – call after auth.js loads */
-    document.addEventListener('DOMContentLoaded', function(){
-        const origLogin = window.doLogin;
-        if(typeof origLogin === 'function'){
-            window.doLogin = function(){
-                origLogin.apply(this, arguments);
-                setTimeout(function(){
-                    const uname = document.getElementById('user-info');
-                    if(uname) updateSidebarAvatar(uname.textContent);
-                }, 100);
-            };
-        }
-    });
 </script>
 
 <script src="/js/globals.js"></script>
@@ -596,7 +539,6 @@
 <script src="/js/categories.js"></script>
 <script src="/js/dashboard.js"></script>
 <script src="/js/app.js"></script>
-
 
 </body>
 </html>
