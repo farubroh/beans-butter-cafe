@@ -240,7 +240,6 @@ def get_costs():
 def add_cost():
     result = sb_post('daily_costs', request.json)
     return jsonify({'success': True, 'data': result})
-
 @app.route('/api/costs/<cost_id>', methods=['DELETE'])
 def delete_cost(cost_id):
     sb_delete('daily_costs', cost_id)
@@ -388,6 +387,39 @@ def add_vendor():
 def delete_vendor(vendor_id):
     sb_delete('vendors', vendor_id)
     return jsonify({'success': True})
+
+
+@app.route('/api/items', methods=['GET'])
+def get_items():
+    vendor_id = request.args.get('vendor', '')
+    # Fetch items with their category and vendor links
+    items = sb_get('items', 'select=*,cost_categories(name,color),item_vendors(vendor_id)&order=name')
+    if not items:
+        return jsonify([])
+    # Filter by vendor if provided
+    if vendor_id:
+        items = [i for i in items if any(
+            iv['vendor_id'] == vendor_id for iv in (i.get('item_vendors') or [])
+        )]
+    return jsonify(items)
+
+@app.route('/api/items', methods=['POST'])
+def add_item():
+    data = request.json
+    vendor_ids = data.pop('vendor_ids', [])
+    result = sb_post('items', data)
+    item = result[0] if isinstance(result, list) else result
+    if vendor_ids and item.get('id'):
+        for vid in vendor_ids:
+            sb_post('item_vendors', {'item_id': item['id'], 'vendor_id': vid})
+    return jsonify({'success': True, 'data': item})
+
+@app.route('/api/vendors/<vendor_id>/items', methods=['GET'])
+def get_vendor_items(vendor_id):
+    links = sb_get('item_vendors', f'vendor_id=eq.{vendor_id}&select=item_id,items(*,cost_categories(name,color))')
+    items = [l['items'] for l in (links or []) if l.get('items')]
+    items.sort(key=lambda x: x.get('name', ''))
+    return jsonify(items)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
