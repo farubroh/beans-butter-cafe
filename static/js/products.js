@@ -44,7 +44,7 @@ function resetProductForm() {
     document.getElementById('prod-name').value       = '';
     document.getElementById('prod-price').value      = '';
     document.getElementById('prod-desc').value       = '';
-    document.getElementById('product-form-title').textContent = '🍽️ Add Product';
+    document.getElementById('product-form-title').textContent = 'Add Product';
 }
 
 async function saveProduct() {

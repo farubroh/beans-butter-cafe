@@ -278,7 +278,7 @@ async function loadCosts() {
     const data = await api(url);
     const list = document.getElementById('costs-list');
     if (!data || !data.length) {
-        list.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-icon">💸</div>No costs for this date</div>';
+        list.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-icon"></div>No costs for this date</div>';
         document.getElementById('costs-total').textContent = fmt(0);
         return;
     }

@@ -6,7 +6,7 @@ async function loadOrders() {
     const data = await api('/api/orders?date='+date);
     const wrap = document.getElementById('orders-table-wrap');
     if (!data || !data.length) {
-        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>No orders for this date</div>';
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="ti ti-clipboard-list"></i></div>No orders for this date</div>';
         return;
     }
 
