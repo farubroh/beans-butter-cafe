@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Beans & Butter Cafe</title>
+    <title>Beans &amp; Butter Cafe</title>
     <link rel="stylesheet" href="/css/main.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
 </head>
 <body>
 
@@ -14,8 +15,7 @@
 <div id="login-screen">
     <div class="login-card">
         <div class="login-logo">
-            <div class="icon">☕</div>
-            <h1>Beans & Butter</h1>
+            <h1>Beans &amp; Butter</h1>
             <p>Cafe Management</p>
         </div>
         <div class="form-group">
@@ -28,7 +28,7 @@
         </div>
         <div id="login-error" class="error-msg"></div>
         <button class="btn btn-primary" style="margin-top:8px" onclick="doLogin()">Sign In →</button>
-        <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:16px">
+        <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:16px">
             Owner: owner / owner123 &nbsp;|&nbsp; Manager: manager / manager123
         </p>
     </div>
@@ -37,399 +37,429 @@
 <!-- ══════════════════════════════════════════════
      APP SHELL
 ══════════════════════════════════════════════ -->
-<div id="app">
+<div id="app" style="display:none;flex-direction:row;min-height:100vh">
 
-    <!-- TOPBAR -->
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar" id="sidebar">
+
+        <!-- Brand -->
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon">B</div>
+            <div class="sidebar-brand-text">
+                <div class="sidebar-brand-name">Beans &amp; Butter</div>
+                <div class="sidebar-brand-sub">Cafe</div>
+            </div>
+        </div>
+
+        <!-- User -->
+        <div class="sidebar-user">
+            <div class="sidebar-avatar" id="sidebar-avatar">–</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="user-info">–</div>
+                <div class="sidebar-user-role" id="role-badge">–</div>
+            </div>
+            <button class="btn-logout" onclick="doLogout()" title="Logout">
+                <i class="ti ti-logout" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <!-- Nav -->
+        <nav class="sidebar-nav">
+            <div id="nav-tabs">
+
+                <div class="nav-section-label">Operations</div>
+
+                <div class="nav-tab active" data-page="order">
+                    <i class="ti ti-shopping-cart tab-icon" aria-hidden="true"></i>
+                    <span class="nav-tab-label">New Order</span>
+                </div>
+
+                <div class="nav-tab" data-page="orders-list">
+                    <i class="ti ti-clipboard-list tab-icon" aria-hidden="true"></i>
+                    <span class="nav-tab-label">Orders</span>
+                </div>
+
+                <div class="nav-tab" data-page="costs">
+                    <i class="ti ti-receipt-2 tab-icon" aria-hidden="true"></i>
+                    <span class="nav-tab-label">Daily Costs</span>
+                </div>
+
+                <div class="nav-divider"></div>
+                <div class="nav-section-label">Management</div>
+
+                <div class="nav-tab" data-page="products">
+                    <i class="ti ti-tools-kitchen-2 tab-icon" aria-hidden="true"></i>
+                    <span class="nav-tab-label">Products</span>
+                </div>
+
+                <div class="nav-tab" data-page="categories">
+                    <i class="ti ti-tag tab-icon" aria-hidden="true"></i>
+                    <span class="nav-tab-label">Categories</span>
+                </div>
+
+                <div class="nav-divider"></div>
+                <div class="nav-section-label owner-only" style="display:none">Owner</div>
+
+                <div class="nav-tab owner-only" data-page="dashboard" style="display:none">
+                    <i class="ti ti-chart-bar tab-icon" aria-hidden="true"></i>
+                    <span class="nav-tab-label">Dashboard</span>
+                </div>
+
+            </div>
+        </nav>
+
+        <!-- Sidebar bottom -->
+        <div class="sidebar-bottom">
+            <div class="nav-tab" id="sidebar-settings-btn" style="cursor:default;opacity:0.5">
+                <i class="ti ti-settings tab-icon" aria-hidden="true"></i>
+                <span class="nav-tab-label">Settings</span>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- ── TOPBAR ── -->
     <div class="topbar">
-        <div class="topbar-brand">☕ Beans & Butter</div>
+        <!-- hamburger for mobile -->
+        <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
+            <i class="ti ti-menu-2" aria-hidden="true"></i>
+        </button>
+
+        <div class="topbar-page-title" id="topbar-page-title">New Order</div>
+
         <div class="topbar-right">
-            <span class="user-badge" id="user-info">–</span>
-            <span class="role-badge" id="role-badge">–</span>
-            <button class="btn-logout" onclick="doLogout()">Logout</button>
+            <div class="topbar-date" id="topbar-date">–</div>
         </div>
     </div>
 
-    <!-- NAV TABS -->
-    <div class="nav-tabs" id="nav-tabs">
-        <div class="nav-tab active"     data-page="order">        <span class="tab-icon">🛒</span>New Order</div>
-        <div class="nav-tab"            data-page="orders-list">  <span class="tab-icon">📋</span>Orders</div>
-        <div class="nav-tab"            data-page="costs">        <span class="tab-icon">💸</span>Daily Costs</div>
-        <div class="nav-tab"            data-page="products">     <span class="tab-icon">🍽️</span>Products</div>
-        <div class="nav-tab"            data-page="categories">   <span class="tab-icon">🏷️</span>Categories</div>
-        <div class="nav-tab owner-only" data-page="dashboard" style="display:none"><span class="tab-icon">📊</span>Dashboard</div>
-    </div>
+    <!-- ── MAIN BODY (pages live here) ── -->
+    <div class="app-body">
 
-    <!-- ══════════════════════════════════════════════
-         TAB 1 — NEW ORDER
-    ══════════════════════════════════════════════ -->
-    <div class="page active" id="page-order">
-        <div class="order-layout">
-            <!-- LEFT: product grid -->
-            <div>
-                <div class="search-wrap">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="product-search" placeholder="Search products by name..."
-                           oninput="handleSearch(this.value)" autocomplete="off"/>
-                    <button class="clear-search" id="clear-search-btn" onclick="clearSearch()" title="Clear search">✕</button>
-                </div>
-                <div id="search-result-count" class="search-result-count" style="display:none"></div>
-                <div class="cat-filter" id="cat-filter"></div>
-                <div class="products-grid" id="products-grid">
-                    <div class="loading">Loading products...</div>
-                </div>
-            </div>
-
-            <!-- RIGHT: cart panel -->
-            <div class="cart-panel">
-                <div class="cart-title">
-                    Order
-                    <button class="btn btn-outline btn-xs" onclick="clearCart()">Clear</button>
-                </div>
-                <div class="cart-items" id="cart-items">
-                    <div class="cart-empty">☕ Add items to order</div>
-                </div>
-                <div class="cart-summary" id="cart-summary" style="display:none">
-                    <div class="summary-row"><span>Subtotal</span><span id="s-subtotal">৳0</span></div>
-                    <div class="discount-row">
-                        <select id="discount-type"
-                                style="padding:8px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;width:100%"
-                                onchange="recalcTotal()">
-                            <option value="none">No Discount</option>
-                            <option value="percent">% Discount</option>
-                            <option value="flat">Flat (৳)</option>
-                        </select>
-                        <input type="number" id="discount-val" placeholder="Value" min="0"
-                               style="padding:8px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;width:100%"
-                               oninput="recalcTotal()"/>
+        <!-- TAB 1: NEW ORDER -->
+        <div class="page active" id="page-order">
+            <div class="order-layout">
+                <div>
+                    <div class="search-wrap">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="product-search" placeholder="Search products by name..."
+                               oninput="handleSearch(this.value)" autocomplete="off"/>
+                        <button class="clear-search" id="clear-search-btn" onclick="clearSearch()" title="Clear search">✕</button>
                     </div>
-                    <div class="summary-row" id="discount-row" style="display:none;color:var(--red)">
-                        <span>Discount</span><span id="s-discount">-৳0</span>
+                    <div id="search-result-count" class="search-result-count" style="display:none"></div>
+                    <div class="cat-filter" id="cat-filter"></div>
+                    <div class="products-grid" id="products-grid">
+                        <div class="loading">Loading products...</div>
                     </div>
-                    <div class="summary-total"><span>TOTAL</span><span id="s-total">৳0</span></div>
+                </div>
 
-                    <!-- Table select -->
-                    <div style="margin-bottom:12px">
-                        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--brown);margin-bottom:8px">Table</div>
-                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px" id="table-select"></div>
+                <div class="cart-panel">
+                    <div class="cart-title">
+                        Order
+                        <button class="btn btn-outline btn-xs" onclick="clearCart()">Clear</button>
                     </div>
-
-                    <!-- Member lookup -->
-                    <div style="margin-bottom:12px">
-                        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--brown);margin-bottom:8px">Member (optional)</div>
-                        <div style="display:flex;gap:6px">
-                            <input type="text" id="member-phone" placeholder="Phone number..."
-                                   style="flex:1;padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px"
-                                   oninput="searchMember(this.value)"/>
-                            <button class="btn btn-outline btn-sm" onclick="clearMember()">✕</button>
+                    <div class="cart-items" id="cart-items">
+                        <div class="cart-empty">☕ Add items to order</div>
+                    </div>
+                    <div class="cart-summary" id="cart-summary" style="display:none">
+                        <div class="summary-row"><span>Subtotal</span><span id="s-subtotal">৳0</span></div>
+                        <div class="discount-row">
+                            <select id="discount-type" onchange="recalcTotal()">
+                                <option value="none">No Discount</option>
+                                <option value="percent">% Discount</option>
+                                <option value="flat">Flat (৳)</option>
+                            </select>
+                            <input type="number" id="discount-val" placeholder="Value" min="0"
+                                   oninput="recalcTotal()"/>
                         </div>
-                        <div id="member-info" style="display:none;margin-top:8px;padding:10px 12px;background:var(--gray-50);border-radius:var(--radius);border:2px solid var(--green);font-size:13px"></div>
-                    </div>
+                        <div class="summary-row" id="discount-row" style="display:none;color:var(--red)">
+                            <span>Discount</span><span id="s-discount">-৳0</span>
+                        </div>
+                        <div class="summary-total"><span>TOTAL</span><span id="s-total">৳0</span></div>
 
-                    <!-- Payment method -->
-                    <div class="payment-row" style="margin-top:12px">
-                        <button class="pay-btn active" id="pay-cash"   onclick="setPayment('cash')">💵 Cash</button>
-                        <button class="pay-btn"         id="pay-card"   onclick="setPayment('card')">💳 Card</button>
-                        <button class="pay-btn"         id="pay-mobile" onclick="setPayment('mobile')">📱 Mobile</button>
-                    </div>
+                        <div style="margin:14px 0 10px">
+                            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:8px">Table</div>
+                            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px" id="table-select"></div>
+                        </div>
 
-                    <input type="text" id="order-note" placeholder="Note (optional)"
-                           style="width:100%;padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;margin-bottom:12px"/>
-                    <button class="btn btn-primary" style="width:100%" onclick="placeOrder()">✓ Place Order</button>
+                        <div style="margin-bottom:12px">
+                            <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:8px">Member (optional)</div>
+                            <div style="display:flex;gap:6px">
+                                <input type="text" id="member-phone" placeholder="Phone number..."
+                                       oninput="searchMember(this.value)"/>
+                                <button class="btn btn-outline btn-sm" onclick="clearMember()">✕</button>
+                            </div>
+                            <div id="member-info" style="display:none"></div>
+                        </div>
+
+                        <div class="payment-row">
+                            <button class="pay-btn active" id="pay-cash"   onclick="setPayment('cash')">💵 Cash</button>
+                            <button class="pay-btn"         id="pay-card"   onclick="setPayment('card')">💳 Card</button>
+                            <button class="pay-btn"         id="pay-mobile" onclick="setPayment('mobile')">📱 Mobile</button>
+                        </div>
+
+                        <input type="text" id="order-note" placeholder="Note (optional)"/>
+                        <button class="btn btn-primary" style="width:100%" onclick="placeOrder()">✓ Place Order</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ══════════════════════════════════════════════
-         TAB 2 — ORDERS LIST
-    ══════════════════════════════════════════════ -->
-    <div class="page" id="page-orders-list">
-        <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-                <div class="card-title" style="margin-bottom:0">📋 Orders History</div>
-                <input type="date" id="orders-date"
-                       style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"
-                       onchange="loadOrders()"/>
+        <!-- TAB 2: ORDERS LIST -->
+        <div class="page" id="page-orders-list">
+            <div class="card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+                    <div class="card-title" style="margin-bottom:0">
+                        <i class="ti ti-clipboard-list" style="font-size:18px;vertical-align:-3px;margin-right:6px;color:var(--amber)"></i>
+                        Orders History
+                    </div>
+                    <input type="date" id="orders-date" onchange="loadOrders()"/>
+                </div>
+                <div id="orders-table-wrap"><div class="loading">Loading...</div></div>
             </div>
-            <div id="orders-table-wrap"><div class="loading">Loading...</div></div>
         </div>
-    </div>
 
-    <!-- ══════════════════════════════════════════════
-         TAB 3 — DAILY COSTS
-    ══════════════════════════════════════════════ -->
-    <div class="page" id="page-costs">
-
-        <!-- ADD COST CARD -->
-        <div class="card" style="margin-bottom:20px">
-            <div class="card-title">💸 Add Cost Entry</div>
-
-            <!-- Step indicators -->
-            <div class="steps-bar">
-                <div class="step-item">
-                    <div class="step-circle active" id="sc1">1</div>
-                    <div class="step-label active"  id="sl1">Vendor</div>
-                </div>
-                <div class="step-line" id="sline1"></div>
-                <div class="step-item">
-                    <div class="step-circle" id="sc2">2</div>
-                    <div class="step-label"  id="sl2">Item</div>
-                </div>
-                <div class="step-line" id="sline2"></div>
-                <div class="step-item">
-                    <div class="step-circle" id="sc3">3</div>
-                    <div class="step-label"  id="sl3">Details</div>
-                </div>
-            </div>
-
-            <!-- Step 1: Vendor -->
-            <div class="section-step" id="step1-panel">
-                <div class="section-step-title">
-                    <div class="step-num-badge">1</div>
-                    Select Vendor
-                </div>
-                <div class="vendor-grid" id="vendor-grid"></div>
-                <div style="display:flex;gap:8px;margin-top:14px;align-items:center">
-                    <input type="text" id="new-vendor-name" placeholder="+ New vendor name..."
-                           style="flex:1;padding:10px 14px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px"/>
-                    <button class="btn btn-amber btn-sm" onclick="addVendorInline()">Add Vendor</button>
-                </div>
-            </div>
-
-            <!-- Step 2: Item search -->
-            <div class="section-step" id="step2-panel" style="display:none">
-                <div class="section-step-title">
-                    <div class="step-num-badge">2</div>
-                    Search or Add Item
-                    <span id="vendor-badge" style="font-size:11px;background:var(--amber);color:var(--white);padding:3px 10px;border-radius:20px;text-transform:none;letter-spacing:0;font-weight:600"></span>
-                    <button class="btn btn-outline btn-xs" onclick="resetVendor()" style="margin-left:auto">← Change Vendor</button>
-                </div>
-
-                <!-- Misc quick categories (other vendor only) -->
-                <div id="misc-cats-wrap" style="display:none;margin-bottom:12px">
-                    <div style="font-size:11px;font-weight:600;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Quick Category</div>
-                    <div class="misc-cats" id="misc-cats">
-                        <button class="misc-cat-chip" onclick="setMiscCat(this,'kitchen')">🍳 Kitchen Supplies</button>
-                        <button class="misc-cat-chip" onclick="setMiscCat(this,'decor')">🎨 Decoration</button>
-                        <button class="misc-cat-chip" onclick="setMiscCat(this,'salary')">👤 Salary / Allowance</button>
-                        <button class="misc-cat-chip" onclick="setMiscCat(this,'rent')">🏠 Rent</button>
-                        <button class="misc-cat-chip" onclick="setMiscCat(this,'transport')">🚗 Transport</button>
-                        <button class="misc-cat-chip" onclick="setMiscCat(this,'utility')">💡 Utility / EMI</button>
-                        <button class="misc-cat-chip" onclick="setMiscCat(this,'charity')">🤲 Charity</button>
-                        <button class="misc-cat-chip" onclick="setMiscCat(this,'other')">📦 Other</button>
+        <!-- TAB 3: DAILY COSTS -->
+        <div class="page" id="page-costs">
+            <div class="card" style="margin-bottom:18px">
+                <div class="card-title">💸 Add Cost Entry</div>
+                <div class="steps-bar">
+                    <div class="step-item">
+                        <div class="step-circle active" id="sc1">1</div>
+                        <div class="step-label active"  id="sl1">Vendor</div>
+                    </div>
+                    <div class="step-line" id="sline1"></div>
+                    <div class="step-item">
+                        <div class="step-circle" id="sc2">2</div>
+                        <div class="step-label"  id="sl2">Item</div>
+                    </div>
+                    <div class="step-line" id="sline2"></div>
+                    <div class="step-item">
+                        <div class="step-circle" id="sc3">3</div>
+                        <div class="step-label"  id="sl3">Details</div>
                     </div>
                 </div>
 
-                <!-- Item search input + dropdown -->
-                <div id="product-search-section">
-                    <div class="item-search-wrap">
-                        <span class="s-icon">🔍</span>
-                        <input type="text" id="item-search" placeholder="Search items for this vendor..."
-                               oninput="searchItems(this.value)" autocomplete="off"/>
-                        <button class="item-clear-btn" id="item-clear-btn" onclick="clearItemSearch()">✕</button>
+                <div class="section-step" id="step1-panel">
+                    <div class="section-step-title">
+                        <div class="step-num-badge">1</div>
+                        Select Vendor
                     </div>
-                    <div class="product-results" id="prod-results"></div>
+                    <div class="vendor-grid" id="vendor-grid"></div>
+                    <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+                        <input type="text" id="new-vendor-name" placeholder="+ New vendor name..."/>
+                        <button class="btn btn-amber btn-sm" onclick="addVendorInline()">Add Vendor</button>
+                    </div>
                 </div>
 
-                <!-- Selected item chip -->
-                <div id="selected-item-chip" style="display:none" class="selected-product-chip">
-                    <span style="font-size:18px" id="chip-icon">📦</span>
-                    <span class="chip-name" id="chip-name">—</span>
-                    <span style="font-size:11px;color:var(--gray-400)" id="chip-vendor-label">—</span>
-                    <button class="chip-clear" onclick="clearSelectedItem()">✕</button>
+                <div class="section-step" id="step2-panel" style="display:none">
+                    <div class="section-step-title">
+                        <div class="step-num-badge">2</div>
+                        Search or Add Item
+                        <span id="vendor-badge"></span>
+                        <button class="btn btn-outline btn-xs" onclick="resetVendor()" style="margin-left:auto">← Change Vendor</button>
+                    </div>
+                    <div id="misc-cats-wrap" style="display:none;margin-bottom:12px">
+                        <div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Quick Category</div>
+                        <div class="misc-cats" id="misc-cats">
+                            <button class="misc-cat-chip" onclick="setMiscCat(this,'kitchen')">🍳 Kitchen Supplies</button>
+                            <button class="misc-cat-chip" onclick="setMiscCat(this,'decor')">🎨 Decoration</button>
+                            <button class="misc-cat-chip" onclick="setMiscCat(this,'salary')">👤 Salary / Allowance</button>
+                            <button class="misc-cat-chip" onclick="setMiscCat(this,'rent')">🏠 Rent</button>
+                            <button class="misc-cat-chip" onclick="setMiscCat(this,'transport')">🚗 Transport</button>
+                            <button class="misc-cat-chip" onclick="setMiscCat(this,'utility')">💡 Utility / EMI</button>
+                            <button class="misc-cat-chip" onclick="setMiscCat(this,'charity')">🤲 Charity</button>
+                            <button class="misc-cat-chip" onclick="setMiscCat(this,'other')">📦 Other</button>
+                        </div>
+                    </div>
+                    <div id="product-search-section">
+                        <div class="item-search-wrap">
+                            <span class="s-icon">🔍</span>
+                            <input type="text" id="item-search" placeholder="Search items for this vendor..."
+                                   oninput="searchItems(this.value)" autocomplete="off"/>
+                            <button class="item-clear-btn" id="item-clear-btn" onclick="clearItemSearch()">✕</button>
+                        </div>
+                        <div class="product-results" id="prod-results"></div>
+                    </div>
+                    <div id="selected-item-chip" style="display:none" class="selected-product-chip">
+                        <span style="font-size:18px" id="chip-icon">📦</span>
+                        <span class="chip-name" id="chip-name">—</span>
+                        <span style="font-size:11px;color:var(--text-muted)" id="chip-vendor-label">—</span>
+                        <button class="chip-clear" onclick="clearSelectedItem()">✕</button>
+                    </div>
+                </div>
+
+                <div class="section-step" id="step3-panel" style="display:none">
+                    <div class="section-step-title">
+                        <div class="step-num-badge">3</div>
+                        Enter Details
+                    </div>
+                    <div class="cost-form-grid">
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" id="cost-qty" placeholder="e.g. 2" min="0" step="any" oninput="calcUnitPrice()"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Unit</label>
+                            <input type="text" id="cost-unit" placeholder="kg / L / pcs / bag"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Total Amount (৳)</label>
+                            <input type="number" id="cost-amount" placeholder="0.00" min="0" step="0.01" oninput="calcUnitPrice()"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Unit Price (auto)</label>
+                            <input type="text" id="cost-unit-price" placeholder="—" readonly/>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="cost-date"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Note (optional)</label>
+                            <input type="text" id="cost-note" placeholder="Any extra info..."/>
+                        </div>
+                        <div style="display:flex;align-items:flex-end">
+                            <button class="btn btn-amber" style="width:100%;padding:12px" onclick="addCost()">+ Add Cost</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Step 3: Details -->
-            <div class="section-step" id="step3-panel" style="display:none">
-                <div class="section-step-title">
-                    <div class="step-num-badge">3</div>
-                    Enter Details
+            <div class="card">
+                <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px">
+                    <div class="card-title" style="margin-bottom:0;flex:1">📋 Cost Records</div>
+                    <input type="date" id="costs-view-date" onchange="loadCosts()"/>
+                    <select id="costs-filter-cat" onchange="loadCosts()">
+                        <option value="">All Categories</option>
+                    </select>
+                    <select id="costs-filter-vendor" onchange="loadCosts()">
+                        <option value="">All Vendors</option>
+                    </select>
                 </div>
-                <div class="cost-form-grid">
+                <div id="costs-list"><div class="loading">Loading...</div></div>
+                <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-weight:700;font-size:15px;color:var(--text)">
+                    <span>Total</span>
+                    <span id="costs-total">৳0</span>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top:18px">
+                <div class="card">
+                    <div class="card-title">🏪 Vendors</div>
+                    <div id="vendors-list"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">🏷️ Cost Categories</div>
+                    <div style="display:flex;gap:10px;margin-bottom:14px">
+                        <input type="text" id="new-cost-cat" placeholder="New category..."
+                               style="flex:1;padding:10px 13px;border:1px solid var(--border);border-radius:var(--radius);font-family:'Jost',sans-serif;background:var(--bg-surface2);color:var(--text)"/>
+                        <input type="color" id="new-cost-cat-color" value="#C8916A"
+                               style="width:44px;height:44px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;padding:2px;background:var(--bg-surface2)"/>
+                        <button class="btn btn-amber" onclick="addCostCategory()">+ Add</button>
+                    </div>
+                    <div id="cost-cats-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: PRODUCTS -->
+        <div class="page" id="page-products">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title" id="product-form-title">🍽️ Add Product</div>
+                    <input type="hidden" id="edit-product-id"/>
                     <div class="form-group">
-                        <label>Quantity</label>
-                        <input type="number" id="cost-qty" placeholder="e.g. 2" min="0" step="any" oninput="calcUnitPrice()"/>
+                        <label>Product Name</label>
+                        <input type="text" id="prod-name" placeholder="e.g. Cappuccino"/>
                     </div>
                     <div class="form-group">
-                        <label>Unit</label>
-                        <input type="text" id="cost-unit" placeholder="kg / L / pcs / bag"/>
+                        <label>Price (৳)</label>
+                        <input type="number" id="prod-price" placeholder="0.00" min="0" step="0.01"/>
                     </div>
                     <div class="form-group">
-                        <label>Total Amount (৳)</label>
-                        <input type="number" id="cost-amount" placeholder="0.00" min="0" step="0.01" oninput="calcUnitPrice()"/>
+                        <label>Category</label>
+                        <select id="prod-cat"></select>
                     </div>
                     <div class="form-group">
-                        <label>Unit Price (auto)</label>
-                        <input type="text" id="cost-unit-price" placeholder="—" readonly/>
+                        <label>Description</label>
+                        <input type="text" id="prod-desc" placeholder="Optional..."/>
                     </div>
-                    <div class="form-group">
-                        <label>Date</label>
-                        <input type="date" id="cost-date"/>
+                    <div style="display:flex;gap:10px">
+                        <button class="btn btn-amber" style="flex:1" onclick="saveProduct()">Save Product</button>
+                        <button class="btn btn-outline" onclick="resetProductForm()">Reset</button>
                     </div>
-                    <div class="form-group">
-                        <label>Note (optional)</label>
-                        <input type="text" id="cost-note" placeholder="Any extra info..."/>
-                    </div>
-                    <div style="display:flex;align-items:flex-end">
-                        <button class="btn btn-amber" style="width:100%;padding:13px" onclick="addCost()">+ Add Cost</button>
-                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">All Products</div>
+                    <div id="products-manage-list"><div class="loading">Loading...</div></div>
                 </div>
             </div>
         </div>
 
-        <!-- COST RECORDS -->
-        <div class="card">
-            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px">
-                <div class="card-title" style="margin-bottom:0;flex:1">📋 Cost Records</div>
-                <input type="date" id="costs-view-date"
-                       style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"
-                       onchange="loadCosts()"/>
-                <select id="costs-filter-cat"
-                        style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"
-                        onchange="loadCosts()">
-                    <option value="">All Categories</option>
-                </select>
-                <select id="costs-filter-vendor"
-                        style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"
-                        onchange="loadCosts()">
-                    <option value="">All Vendors</option>
-                </select>
-            </div>
-            <div id="costs-list"><div class="loading">Loading...</div></div>
-            <div style="margin-top:16px;padding-top:16px;border-top:2px solid var(--gray-100);display:flex;justify-content:space-between;font-weight:700;font-size:16px">
-                <span>Total</span>
-                <span id="costs-total" style="color:var(--red)">৳0</span>
+        <!-- TAB 5: CATEGORIES -->
+        <div class="page" id="page-categories">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-title">🏷️ Add Product Category</div>
+                    <div class="form-group">
+                        <label>Category Name</label>
+                        <input type="text" id="new-cat-name" placeholder="e.g. Beverages"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Color</label>
+                        <input type="color" id="new-cat-color" value="#C8916A"/>
+                    </div>
+                    <button class="btn btn-amber" style="width:100%" onclick="addCategory()">+ Add Category</button>
+                </div>
+                <div class="card">
+                    <div class="card-title">All Categories</div>
+                    <div id="cats-list"><div class="loading">Loading...</div></div>
+                </div>
             </div>
         </div>
 
-        <!-- MANAGE VENDORS & COST CATEGORIES -->
-        <div class="grid-2" style="margin-top:20px">
-            <div class="card">
-                <div class="card-title">🏪 Vendors</div>
-                <div id="vendors-list"></div>
+        <!-- TAB 6: DASHBOARD (OWNER ONLY) -->
+        <div class="page" id="page-dashboard">
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap">
+                <h2 style="flex:1">📊 Owner Dashboard</h2>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <label style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Date:</label>
+                    <input type="date" id="dash-date" onchange="loadDashboard()"/>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <label style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">Month:</label>
+                    <input type="month" id="dash-month" onchange="loadMonthly()"/>
+                </div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">Today Sales</div><div class="stat-value amber" id="d-sales">৳0</div></div>
+                <div class="stat-card"><div class="stat-label">Today Costs</div><div class="stat-value red"   id="d-costs">৳0</div></div>
+                <div class="stat-card"><div class="stat-label">Net Profit</div><div class="stat-value green"  id="d-profit">৳0</div></div>
+                <div class="stat-card"><div class="stat-label">Orders Today</div><div class="stat-value"     id="d-orders">0</div></div>
+                <div class="stat-card"><div class="stat-label">Avg Order</div><div class="stat-value amber"  id="d-avg">৳0</div></div>
+            </div>
+            <div class="grid-2" style="margin-bottom:18px">
+                <div class="card">
+                    <div class="card-title">📅 Monthly Sales vs Costs</div>
+                    <div class="stats-grid" style="margin-bottom:14px">
+                        <div><div class="stat-label">Month Sales</div><div class="stat-value amber" id="m-sales">৳0</div></div>
+                        <div><div class="stat-label">Month Costs</div><div class="stat-value red"   id="m-costs">৳0</div></div>
+                        <div><div class="stat-label">Month Profit</div><div class="stat-value green" id="m-profit">৳0</div></div>
+                    </div>
+                    <div id="monthly-chart"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">🏆 Top Products</div>
+                    <div id="top-products-chart"></div>
+                </div>
             </div>
             <div class="card">
-                <div class="card-title">🏷️ Cost Categories</div>
-                <div style="display:flex;gap:10px;margin-bottom:16px">
-                    <input type="text" id="new-cost-cat" placeholder="New category..."
-                           style="flex:1;padding:10px 14px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"/>
-                    <input type="color" id="new-cost-cat-color" value="#E07B39"
-                           style="width:44px;height:44px;border:2px solid var(--gray-200);border-radius:var(--radius);cursor:pointer;padding:2px"/>
-                    <button class="btn btn-amber" onclick="addCostCategory()">+ Add</button>
-                </div>
-                <div id="cost-cats-list"></div>
+                <div class="card-title">📋 Today's Orders</div>
+                <div id="dash-orders-table"><div class="loading">Loading...</div></div>
             </div>
         </div>
-    </div>
 
-    <!-- ══════════════════════════════════════════════
-         TAB 4 — PRODUCTS
-    ══════════════════════════════════════════════ -->
-    <div class="page" id="page-products">
-        <div class="grid-2">
-            <div class="card">
-                <div class="card-title" id="product-form-title">🍽️ Add Product</div>
-                <input type="hidden" id="edit-product-id"/>
-                <div class="form-group">
-                    <label>Product Name</label>
-                    <input type="text" id="prod-name" placeholder="e.g. Cappuccino"/>
-                </div>
-                <div class="form-group">
-                    <label>Price (৳)</label>
-                    <input type="number" id="prod-price" placeholder="0.00" min="0" step="0.01"/>
-                </div>
-                <div class="form-group">
-                    <label>Category</label>
-                    <select id="prod-cat"></select>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <input type="text" id="prod-desc" placeholder="Optional..."/>
-                </div>
-                <div style="display:flex;gap:10px">
-                    <button class="btn btn-amber" style="flex:1" onclick="saveProduct()">Save Product</button>
-                    <button class="btn btn-outline" onclick="resetProductForm()">Reset</button>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-title">All Products</div>
-                <div id="products-manage-list"><div class="loading">Loading...</div></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════════
-         TAB 5 — CATEGORIES
-    ══════════════════════════════════════════════ -->
-    <div class="page" id="page-categories">
-        <div class="grid-2">
-            <div class="card">
-                <div class="card-title">🏷️ Add Product Category</div>
-                <div class="form-group">
-                    <label>Category Name</label>
-                    <input type="text" id="new-cat-name" placeholder="e.g. Beverages"/>
-                </div>
-                <div class="form-group">
-                    <label>Color</label>
-                    <input type="color" id="new-cat-color" value="#6F4E37"
-                           style="width:100%;height:44px;border:2px solid var(--gray-200);border-radius:var(--radius);cursor:pointer;padding:4px"/>
-                </div>
-                <button class="btn btn-amber" style="width:100%" onclick="addCategory()">+ Add Category</button>
-            </div>
-            <div class="card">
-                <div class="card-title">All Categories</div>
-                <div id="cats-list"><div class="loading">Loading...</div></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ══════════════════════════════════════════════
-         TAB 6 — DASHBOARD (OWNER ONLY)
-    ══════════════════════════════════════════════ -->
-    <div class="page" id="page-dashboard">
-        <div style="display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
-            <h2 style="font-family:'Playfair Display',serif;font-size:24px;flex:1">📊 Owner Dashboard</h2>
-            <div style="display:flex;gap:8px;align-items:center">
-                <label style="font-size:13px;font-weight:600;color:var(--brown)">Date:</label>
-                <input type="date" id="dash-date"
-                       style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"
-                       onchange="loadDashboard()"/>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center">
-                <label style="font-size:13px;font-weight:600;color:var(--brown)">Month:</label>
-                <input type="month" id="dash-month"
-                       style="padding:8px 12px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif"
-                       onchange="loadMonthly()"/>
-            </div>
-        </div>
-        <div class="stats-grid">
-            <div class="stat-card"><div class="stat-label">Today Sales</div><div class="stat-value amber" id="d-sales">৳0</div></div>
-            <div class="stat-card"><div class="stat-label">Today Costs</div><div class="stat-value red"   id="d-costs">৳0</div></div>
-            <div class="stat-card"><div class="stat-label">Net Profit</div><div class="stat-value green"  id="d-profit">৳0</div></div>
-            <div class="stat-card"><div class="stat-label">Orders Today</div><div class="stat-value"     id="d-orders">0</div></div>
-            <div class="stat-card"><div class="stat-label">Avg Order</div><div class="stat-value amber"  id="d-avg">৳0</div></div>
-        </div>
-        <div class="grid-2" style="margin-bottom:20px">
-            <div class="card">
-                <div class="card-title">📅 Monthly Sales vs Costs</div>
-                <div class="stats-grid" style="margin-bottom:16px">
-                    <div><div class="stat-label">Month Sales</div><div class="stat-value amber" id="m-sales">৳0</div></div>
-                    <div><div class="stat-label">Month Costs</div><div class="stat-value red"   id="m-costs">৳0</div></div>
-                    <div><div class="stat-label">Month Profit</div><div class="stat-value green" id="m-profit">৳0</div></div>
-                </div>
-                <div id="monthly-chart"></div>
-            </div>
-            <div class="card">
-                <div class="card-title">🏆 Top Products</div>
-                <div id="top-products-chart"></div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">📋 Today's Orders</div>
-            <div id="dash-orders-table"><div class="loading">Loading...</div></div>
-        </div>
-    </div>
+    </div><!-- /app-body -->
 
 </div><!-- /app -->
 
@@ -455,9 +485,67 @@
 <div id="print-area"></div>
 <div id="toast"></div>
 
-<!-- ══════════════════════════════════════════════
-     SCRIPTS — load order matters
-══════════════════════════════════════════════ -->
+<!-- ── Sidebar & topbar wiring ── -->
+<script>
+    /* Topbar: show current date */
+    (function(){
+        const d = new Date();
+        const el = document.getElementById('topbar-date');
+        if(el) el.textContent = d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+    })();
+
+    /* Page title sync */
+    const PAGE_TITLES = {
+        'order':       'New Order',
+        'orders-list': 'Orders',
+        'costs':       'Daily Costs',
+        'products':    'Products',
+        'categories':  'Categories',
+        'dashboard':   'Dashboard'
+    };
+
+    /* Sidebar avatar initials from username */
+    function updateSidebarAvatar(username){
+        const el = document.getElementById('sidebar-avatar');
+        if(el && username){
+            el.textContent = username.slice(0,2).toUpperCase();
+        }
+    }
+
+    /* Intercept nav-tab clicks to update topbar title */
+    document.addEventListener('click', function(e){
+        const tab = e.target.closest('.nav-tab[data-page]');
+        if(tab){
+            const page = tab.getAttribute('data-page');
+            const titleEl = document.getElementById('topbar-page-title');
+            if(titleEl && PAGE_TITLES[page]) titleEl.textContent = PAGE_TITLES[page];
+            /* close sidebar on mobile */
+            if(window.innerWidth < 768){
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+    });
+
+    /* Mobile hamburger */
+    function toggleSidebar(){
+        document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    /* Patch doLogin to also update avatar – call after auth.js loads */
+    document.addEventListener('DOMContentLoaded', function(){
+        const origLogin = window.doLogin;
+        if(typeof origLogin === 'function'){
+            window.doLogin = function(){
+                origLogin.apply(this, arguments);
+                setTimeout(function(){
+                    const uname = document.getElementById('user-info');
+                    if(uname) updateSidebarAvatar(uname.textContent);
+                }, 100);
+            };
+        }
+    });
+</script>
+
 <script src="/js/globals.js"></script>
 <script src="/js/auth.js"></script>
 <script src="/js/order.js"></script>
@@ -467,6 +555,7 @@
 <script src="/js/categories.js"></script>
 <script src="/js/dashboard.js"></script>
 <script src="/js/app.js"></script>
+
 
 </body>
 </html>
