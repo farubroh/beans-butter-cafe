@@ -10,9 +10,9 @@
 <body>
 
 <!-- ══════════════════════════════════════════════
-     LOGIN SCREEN
+     LOGIN page
 ══════════════════════════════════════════════ -->
-<div id="login-screen">
+<div id="login-screen" style="display:none">
     <div class="login-card">
         <div class="login-logo">
             <h1>Beans &amp; Butter</h1>
@@ -538,7 +538,7 @@
     (function(){
         const d = new Date();
         const el = document.getElementById('topbar-date');
-        if(el) el.textContent = d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+        if (el) el.textContent = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
     })();
 
     const PAGE_TITLES = {
@@ -556,7 +556,7 @@
 
     document.addEventListener('click', function(e){
         const tab = e.target.closest('.nav-tab[data-page]');
-        if(tab){
+        if (tab) {
             const page = tab.getAttribute('data-page');
             const titleEl = document.getElementById('topbar-page-title');
             if(titleEl && PAGE_TITLES[page]) titleEl.textContent = PAGE_TITLES[page];
