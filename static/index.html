@@ -42,7 +42,6 @@
     <!-- ── SIDEBAR ── -->
     <aside class="sidebar" id="sidebar">
 
-        <!-- Brand -->
         <div class="sidebar-brand">
             <div class="sidebar-brand-icon">B</div>
             <div class="sidebar-brand-text">
@@ -51,7 +50,6 @@
             </div>
         </div>
 
-        <!-- User -->
         <div class="sidebar-user">
             <div class="sidebar-avatar" id="sidebar-avatar">–</div>
             <div class="sidebar-user-info">
@@ -63,7 +61,6 @@
             </button>
         </div>
 
-        <!-- Nav -->
         <nav class="sidebar-nav">
             <div id="nav-tabs">
 
@@ -87,14 +84,9 @@
                 <div class="nav-divider"></div>
                 <div class="nav-section-label">Management</div>
 
-                <div class="nav-tab" data-page="products">
-                    <i class="ti ti-tools-kitchen-2 tab-icon" aria-hidden="true"></i>
-                    <span class="nav-tab-label">Products</span>
-                </div>
-
-                <div class="nav-tab" data-page="categories">
-                    <i class="ti ti-tag tab-icon" aria-hidden="true"></i>
-                    <span class="nav-tab-label">Categories</span>
+                <div class="nav-tab" data-page="addremove">
+                    <i class="ti ti-adjustments tab-icon" aria-hidden="true"></i>
+                    <span class="nav-tab-label">Add / Remove</span>
                 </div>
 
                 <div class="nav-divider"></div>
@@ -108,7 +100,6 @@
             </div>
         </nav>
 
-        <!-- Sidebar bottom -->
         <div class="sidebar-bottom">
             <div class="nav-tab" id="sidebar-settings-btn" style="cursor:default;opacity:0.5">
                 <i class="ti ti-settings tab-icon" aria-hidden="true"></i>
@@ -120,19 +111,16 @@
 
     <!-- ── TOPBAR ── -->
     <div class="topbar">
-        <!-- hamburger for mobile -->
         <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
             <i class="ti ti-menu-2" aria-hidden="true"></i>
         </button>
-
         <div class="topbar-page-title" id="topbar-page-title">New Order</div>
-
         <div class="topbar-right">
             <div class="topbar-date" id="topbar-date">–</div>
         </div>
     </div>
 
-    <!-- ── MAIN BODY (pages live here) ── -->
+    <!-- ── MAIN BODY ── -->
     <div class="app-body">
 
         <!-- TAB 1: NEW ORDER -->
@@ -140,7 +128,7 @@
             <div class="order-layout">
                 <div>
                     <div class="search-wrap">
-                        <span class="search-icon">🔍</span>
+                        <span class="search-icon"><i class="ti ti-search" aria-hidden="true"></i></span>
                         <input type="text" id="product-search" placeholder="Search products by name..."
                                oninput="handleSearch(this.value)" autocomplete="off"/>
                         <button class="clear-search" id="clear-search-btn" onclick="clearSearch()" title="Clear search">✕</button>
@@ -158,7 +146,7 @@
                         <button class="btn btn-outline btn-xs" onclick="clearCart()">Clear</button>
                     </div>
                     <div class="cart-items" id="cart-items">
-                        <div class="cart-empty">☕ Add items to order</div>
+                        <div class="cart-empty">Add items to order</div>
                     </div>
                     <div class="cart-summary" id="cart-summary" style="display:none">
                         <div class="summary-row"><span>Subtotal</span><span id="s-subtotal">৳0</span></div>
@@ -168,8 +156,7 @@
                                 <option value="percent">% Discount</option>
                                 <option value="flat">Flat (৳)</option>
                             </select>
-                            <input type="number" id="discount-val" placeholder="Value" min="0"
-                                   oninput="recalcTotal()"/>
+                            <input type="number" id="discount-val" placeholder="Value" min="0" oninput="recalcTotal()"/>
                         </div>
                         <div class="summary-row" id="discount-row" style="display:none;color:var(--red)">
                             <span>Discount</span><span id="s-discount">-৳0</span>
@@ -184,17 +171,16 @@
                         <div style="margin-bottom:12px">
                             <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:8px">Member (optional)</div>
                             <div style="display:flex;gap:6px">
-                                <input type="text" id="member-phone" placeholder="Phone number..."
-                                       oninput="searchMember(this.value)"/>
+                                <input type="text" id="member-phone" placeholder="Phone number..." oninput="searchMember(this.value)"/>
                                 <button class="btn btn-outline btn-sm" onclick="clearMember()">✕</button>
                             </div>
                             <div id="member-info" style="display:none"></div>
                         </div>
 
                         <div class="payment-row">
-                            <button class="pay-btn active" id="pay-cash"   onclick="setPayment('cash')">💵 Cash</button>
-                            <button class="pay-btn"         id="pay-card"   onclick="setPayment('card')">💳 Card</button>
-                            <button class="pay-btn"         id="pay-mobile" onclick="setPayment('mobile')">📱 Mobile</button>
+                            <button class="pay-btn active" id="pay-cash"   onclick="setPayment('cash')"><i class="ti ti-cash"></i> Cash</button>
+                            <button class="pay-btn"        id="pay-card"   onclick="setPayment('card')"><i class="ti ti-credit-card"></i> Card</button>
+                            <button class="pay-btn"        id="pay-mobile" onclick="setPayment('mobile')"><i class="ti ti-device-mobile"></i> Mobile</button>
                         </div>
 
                         <input type="text" id="order-note" placeholder="Note (optional)"/>
@@ -208,10 +194,7 @@
         <div class="page" id="page-orders-list">
             <div class="card">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-                    <div class="card-title" style="margin-bottom:0">
-                        <i class="ti ti-clipboard-list" style="font-size:18px;vertical-align:-3px;margin-right:6px;color:var(--amber)"></i>
-                        Orders History
-                    </div>
+                    <div class="card-title" style="margin-bottom:0">Orders History</div>
                     <input type="date" id="orders-date" onchange="loadOrders()"/>
                 </div>
                 <div id="orders-table-wrap"><div class="loading">Loading...</div></div>
@@ -221,7 +204,7 @@
         <!-- TAB 3: DAILY COSTS -->
         <div class="page" id="page-costs">
             <div class="card" style="margin-bottom:18px">
-                <div class="card-title"> Add Cost Entry</div>
+                <div class="card-title">Add Cost Entry</div>
                 <div class="steps-bar">
                     <div class="step-item">
                         <div class="step-circle active" id="sc1">1</div>
@@ -251,7 +234,6 @@
                     </div>
                 </div>
 
-                <!-- replace the entire step2-panel div -->
                 <div class="section-step" id="step2-panel" style="display:none">
                     <div class="section-step-title">
                         <div class="step-num-badge">2</div>
@@ -260,33 +242,18 @@
                         <button class="btn btn-outline btn-xs" onclick="resetVendor()" style="margin-left:auto">← Change Vendor</button>
                     </div>
 
-                    <!-- two-column layout -->
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px">
-
-                        <!-- LEFT: item list -->
                         <div>
-                            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--text-muted);margin-bottom:8px">
-                                Items for this vendor
-                            </div>
-                            <div id="prod-results" style="
-                border:1px solid var(--border);
-                border-radius:var(--radius);
-                overflow-y:auto;
-                max-height:280px;
-                background:var(--bg-surface2);
-            "></div>
+                            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--text-muted);margin-bottom:8px">Items for this vendor</div>
+                            <div id="prod-results" style="border:1px solid var(--border);border-radius:var(--radius);overflow-y:auto;max-height:280px;background:var(--bg-surface2);"></div>
                         </div>
 
-                        <!-- RIGHT: search + add -->
                         <div style="display:flex;flex-direction:column;gap:10px">
                             <div>
-                                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--text-muted);margin-bottom:8px">
-                                    Search
-                                </div>
+                                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--text-muted);margin-bottom:8px">Search</div>
                                 <div class="item-search-wrap">
-                                    <span class="s-icon">🔍</span>
-                                    <input type="text" id="item-search" placeholder="Type to filter items..."
-                                           oninput="searchItems(this.value)" autocomplete="off"/>
+                                    <span class="s-icon"><i class="ti ti-search" aria-hidden="true"></i></span>
+                                    <input type="text" id="item-search" placeholder="Type to filter items..." oninput="searchItems(this.value)" autocomplete="off"/>
                                     <button class="item-clear-btn" id="item-clear-btn" onclick="clearItemSearch()">✕</button>
                                     <button class="btn btn-amber btn-xs" id="inline-add-btn"
                                             style="display:none;white-space:nowrap;margin-right:4px"
@@ -296,7 +263,6 @@
                                 </div>
                             </div>
 
-                            <!-- misc cat chips (for Other vendor) -->
                             <div id="misc-cats-wrap" style="display:none">
                                 <div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Quick Filter</div>
                                 <div class="misc-cats" id="misc-cats">
@@ -310,19 +276,13 @@
                                     <button class="misc-cat-chip" onclick="setMiscCat(this,'other')">📦 Other</button>
                                 </div>
                             </div>
-
-<!--                            &lt;!&ndash; add new item button &ndash;&gt;-->
-<!--                            <button class="btn btn-outline" style="margin-top:auto" onclick="openAddItemModal('')">-->
-<!--                                <i class="ti ti-plus" style="margin-right:6px"></i>Add New Item-->
-<!--                            </button>-->
                         </div>
                     </div>
 
-                    <!-- selected item chip -->
                     <div id="selected-item-chip" style="display:none;margin-top:12px" class="selected-product-chip">
-        <span id="chip-icon" style="font-size:18px;color:var(--text-muted)">
-            <i class="ti ti-package" aria-hidden="true"></i>
-        </span>
+                        <span id="chip-icon" style="font-size:18px;color:var(--text-muted)">
+                            <i class="ti ti-package" aria-hidden="true"></i>
+                        </span>
                         <span class="chip-name" id="chip-name">—</span>
                         <span style="font-size:11px;color:var(--text-muted)" id="chip-vendor-label">—</span>
                         <button class="chip-clear" onclick="clearSelectedItem()">✕</button>
@@ -366,9 +326,10 @@
                 </div>
             </div>
 
+            <!-- Cost Records -->
             <div class="card">
                 <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px">
-                    <div class="card-title" style="margin-bottom:0;flex:1"> Cost Records</div>
+                    <div class="card-title" style="margin-bottom:0;flex:1">Cost Records</div>
                     <input type="date" id="costs-view-date" onchange="loadCosts()"/>
                     <select id="costs-filter-cat" onchange="loadCosts()">
                         <option value="">All Categories</option>
@@ -383,83 +344,130 @@
                     <span id="costs-total">৳0</span>
                 </div>
             </div>
-
-            <div class="grid-2" style="margin-top:18px">
-                <div class="card">
-                    <div class="card-title"> Vendors</div>
-                    <div id="vendors-list"></div>
-                </div>
-                <div class="card">
-                    <div class="card-title">🏷️ Cost Categories</div>
-                    <div style="display:flex;gap:10px;margin-bottom:14px">
-                        <input type="text" id="new-cost-cat" placeholder="New category..."
-                               style="flex:1;padding:10px 13px;border:1px solid var(--border);border-radius:var(--radius);font-family:'Jost',sans-serif;background:var(--bg-surface2);color:var(--text)"/>
-                        <input type="color" id="new-cost-cat-color" value="#C8916A"
-                               style="width:44px;height:44px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;padding:2px;background:var(--bg-surface2)"/>
-                        <button class="btn btn-amber" onclick="addCostCategory()">+ Add</button>
-                    </div>
-                    <div id="cost-cats-list"></div>
-                </div>
-            </div>
         </div>
 
-        <!-- TAB 4: PRODUCTS -->
-        <div class="page" id="page-products">
-            <div class="grid-2">
-                <div class="card">
-                    <div class="card-title" id="product-form-title">🍽️ Add Product</div>
-                    <input type="hidden" id="edit-product-id"/>
-                    <div class="form-group">
-                        <label>Product Name</label>
-                        <input type="text" id="prod-name" placeholder="e.g. Cappuccino"/>
+        <!-- TAB 4: ADD / REMOVE -->
+        <div class="page" id="page-addremove">
+
+            <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+                <button class="ar-tab active" onclick="switchArTab(this,'ar-products')">Products</button>
+                <button class="ar-tab" onclick="switchArTab(this,'ar-categories')">Categories</button>
+                <button class="ar-tab" onclick="switchArTab(this,'ar-vendors')">Vendors</button>
+                <button class="ar-tab" onclick="switchArTab(this,'ar-costcats')">Cost Categories</button>
+            </div>
+
+            <!-- Products -->
+            <div id="ar-products" class="ar-section">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title" id="product-form-title">Add Product</div>
+                        <input type="hidden" id="edit-product-id"/>
+                        <div class="form-group">
+                            <label>Product Name</label>
+                            <input type="text" id="prod-name" placeholder="e.g. Cappuccino"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Price (৳)</label>
+                            <input type="number" id="prod-price" placeholder="0.00" min="0" step="0.01"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="prod-cat"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" id="prod-desc" placeholder="Optional..."/>
+                        </div>
+                        <div style="display:flex;gap:10px">
+                            <button class="btn btn-amber" style="flex:1" onclick="saveProduct()">Save Product</button>
+                            <button class="btn btn-outline" onclick="resetProductForm()">Reset</button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Price (৳)</label>
-                        <input type="number" id="prod-price" placeholder="0.00" min="0" step="0.01"/>
+                    <div class="card">
+                        <div class="card-title">All Products</div>
+                        <div id="products-manage-list"><div class="loading">Loading...</div></div>
                     </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select id="prod-cat"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <input type="text" id="prod-desc" placeholder="Optional..."/>
-                    </div>
-                    <div style="display:flex;gap:10px">
-                        <button class="btn btn-amber" style="flex:1" onclick="saveProduct()">Save Product</button>
-                        <button class="btn btn-outline" onclick="resetProductForm()">Reset</button>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-title">All Products</div>
-                    <div id="products-manage-list"><div class="loading">Loading...</div></div>
                 </div>
             </div>
-        </div>
 
-        <!-- TAB 5: CATEGORIES -->
-        <div class="page" id="page-categories">
-            <div class="grid-2">
-                <div class="card">
-                    <div class="card-title">🏷️ Add Product Category</div>
-                    <div class="form-group">
-                        <label>Category Name</label>
-                        <input type="text" id="new-cat-name" placeholder="e.g. Beverages"/>
+            <!-- Categories -->
+            <!-- Categories -->
+            <div id="ar-categories" class="ar-section" style="display:none">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title" id="cat-form-title">Add Product Category</div>
+                        <input type="hidden" id="edit-cat-id"/>
+                        <div class="form-group">
+                            <label>Category Name</label>
+                            <input type="text" id="new-cat-name" placeholder="e.g. Beverages"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Color</label>
+                            <input type="color" id="new-cat-color" value="#C8916A"/>
+                        </div>
+                        <div style="display:flex;gap:10px">
+                            <button class="btn btn-amber" style="flex:1" id="cat-save-btn" onclick="addCategory()">+ Add Category</button>
+                            <button class="btn btn-outline" id="cat-reset-btn" style="display:none" onclick="resetCategoryForm()">Reset</button>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Color</label>
-                        <input type="color" id="new-cat-color" value="#C8916A"/>
+                    <div class="card">
+                        <div class="card-title">All Categories</div>
+                        <div id="cats-list"><div class="loading">Loading...</div></div>
                     </div>
-                    <button class="btn btn-amber" style="width:100%" onclick="addCategory()">+ Add Category</button>
-                </div>
-                <div class="card">
-                    <div class="card-title">All Categories</div>
-                    <div id="cats-list"><div class="loading">Loading...</div></div>
                 </div>
             </div>
+
+            <!-- Vendors -->
+            <div id="ar-vendors" class="ar-section" style="display:none">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title" id="vendor-form-title">Add Vendor</div>
+                        <input type="hidden" id="edit-vendor-id"/>
+                        <div class="form-group">
+                            <label>Vendor Name</label>
+                            <input type="text" id="new-vendor-name-ar" placeholder="e.g. Local Supplier"/>
+                        </div>
+                        <div style="display:flex;gap:10px">
+                            <button class="btn btn-amber" style="flex:1" id="vendor-save-btn" onclick="addVendorAr()">+ Add Vendor</button>
+                            <button class="btn btn-outline" id="vendor-reset-btn" style="display:none" onclick="resetVendorForm()">Reset</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">All Vendors</div>
+                        <div id="vendors-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Categories -->
+            <div id="ar-costcats" class="ar-section" style="display:none">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title" id="cost-cat-form-title">Add Cost Category</div>
+                        <input type="hidden" id="edit-cost-cat-id"/>
+                        <div class="form-group">
+                            <label>Category Name</label>
+                            <input type="text" id="new-cost-cat" placeholder="e.g. Ingredients"/>
+                        </div>
+                        <div class="form-group">
+                            <label>Color</label>
+                            <input type="color" id="new-cost-cat-color" value="#C8916A"/>
+                        </div>
+                        <div style="display:flex;gap:10px">
+                            <button class="btn btn-amber" style="flex:1" id="cost-cat-save-btn" onclick="addCostCategory()">+ Add Category</button>
+                            <button class="btn btn-outline" id="cost-cat-reset-btn" style="display:none" onclick="resetCostCatForm()">Reset</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">All Cost Categories</div>
+                        <div id="cost-cats-list"></div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-        <!-- TAB 6: DASHBOARD (OWNER ONLY) -->
+        <!-- TAB 5: DASHBOARD (OWNER ONLY) -->
         <div class="page" id="page-dashboard">
             <div style="display:flex;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap">
                 <h2 style="flex:1">📊 Owner Dashboard</h2>
@@ -526,53 +534,42 @@
 <div id="print-area"></div>
 <div id="toast"></div>
 
-<!-- ── Sidebar & topbar wiring ── -->
 <script>
-    /* Topbar: show current date */
     (function(){
         const d = new Date();
         const el = document.getElementById('topbar-date');
         if(el) el.textContent = d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
     })();
 
-    /* Page title sync */
     const PAGE_TITLES = {
         'order':       'New Order',
         'orders-list': 'Orders',
         'costs':       'Daily Costs',
-        'products':    'Products',
-        'categories':  'Categories',
+        'addremove':   'Add / Remove',
         'dashboard':   'Dashboard'
     };
 
-    /* Sidebar avatar initials from username */
     function updateSidebarAvatar(username){
         const el = document.getElementById('sidebar-avatar');
-        if(el && username){
-            el.textContent = username.slice(0,2).toUpperCase();
-        }
+        if(el && username) el.textContent = username.slice(0,2).toUpperCase();
     }
 
-    /* Intercept nav-tab clicks to update topbar title */
     document.addEventListener('click', function(e){
         const tab = e.target.closest('.nav-tab[data-page]');
         if(tab){
             const page = tab.getAttribute('data-page');
             const titleEl = document.getElementById('topbar-page-title');
             if(titleEl && PAGE_TITLES[page]) titleEl.textContent = PAGE_TITLES[page];
-            /* close sidebar on mobile */
             if(window.innerWidth < 768){
                 document.getElementById('sidebar').classList.remove('open');
             }
         }
     });
 
-    /* Mobile hamburger */
     function toggleSidebar(){
         document.getElementById('sidebar').classList.toggle('open');
     }
 
-    /* Patch doLogin to also update avatar – call after auth.js loads */
     document.addEventListener('DOMContentLoaded', function(){
         const origLogin = window.doLogin;
         if(typeof origLogin === 'function'){
@@ -596,7 +593,6 @@
 <script src="/js/categories.js"></script>
 <script src="/js/dashboard.js"></script>
 <script src="/js/app.js"></script>
-
 
 </body>
 </html>

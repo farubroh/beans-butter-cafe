@@ -36,7 +36,7 @@ function editProduct(p) {
     document.getElementById('prod-price').value      = p.price;
     document.getElementById('prod-cat').value        = p.category_id||'';
     document.getElementById('prod-desc').value       = p.description||'';
-    document.getElementById('product-form-title').textContent = '✏️ Edit Product';
+    document.getElementById('product-form-title').textContent = 'Edit Product';
 }
 
 function resetProductForm() {
@@ -44,7 +44,7 @@ function resetProductForm() {
     document.getElementById('prod-name').value       = '';
     document.getElementById('prod-price').value      = '';
     document.getElementById('prod-desc').value       = '';
-    document.getElementById('product-form-title').textContent = '🍽️ Add Product';
+    document.getElementById('product-form-title').textContent = 'Add Product';
 }
 
 async function saveProduct() {

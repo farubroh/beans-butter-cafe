@@ -407,6 +407,10 @@ body {
     margin-left: var(--sidebar-w);
     margin-top: var(--topbar-h);
     min-height: calc(100vh - var(--topbar-h));
+
+    /* ADD THESE */
+    width: calc(100% - var(--sidebar-w));
+    min-width: 0;
 }
 
 /* ── PAGE ── */
@@ -872,7 +876,7 @@ body {
 .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 8px; transition: background 0.3s; }
 .step-line.done { background: var(--green); }
 
-.vendor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 9px; }
+.vendor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 9px;min-height: 60px; }
 .vendor-card {
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -1110,4 +1114,20 @@ input[readonly] { background: var(--bg-surface3) !important; color: black !impor
     40%       { transform: translateX(5px); }
     60%       { transform: translateX(-4px); }
     80%       { transform: translateX(4px); }
+}/* ══════════════════════════════════════════════
+   ADD/REMOVE PAGE TABS
+══════════════════════════════════════════════ */
+.ar-tab {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg-surface);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: all 0.15s;
+    font-family: 'Jost', sans-serif;
 }
+.ar-tab:hover { border-color: var(--accent); color: var(--text); }
+.ar-tab.active { background: #1B2E22; color: white; border-color: #1B2E22; font-weight: 600; }

@@ -223,6 +223,7 @@ def delete_cost_category(cat_id):
     sb_delete('cost_categories', cat_id)
     return jsonify({'success': True})
 
+
 @app.route('/api/costs', methods=['GET'])
 def get_costs():
     date_filter = request.args.get('date', datetime.now(DHAKA).strftime('%Y-%m-%d'))
@@ -420,6 +421,18 @@ def get_vendor_items(vendor_id):
     items = [l['items'] for l in (links or []) if l.get('items')]
     items.sort(key=lambda x: x.get('name', ''))
     return jsonify(items)
+
+
+@app.route('/api/vendors/<vendor_id>', methods=['PUT'])
+def update_vendor(vendor_id):
+    sb_patch('vendors', vendor_id, request.json)
+    return jsonify({'success': True})
+
+
+@app.route('/api/cost-categories/<cat_id>', methods=['PUT'])
+def update_cost_category(cat_id):
+    sb_patch('cost_categories', cat_id, request.json)
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

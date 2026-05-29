@@ -254,7 +254,7 @@ async function loadCosts() {
     const data = await api(url);
     const list = document.getElementById('costs-list');
     if (!data || !data.length) {
-        list.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-icon">💸</div>No costs for this date</div>';
+        list.innerHTML = '<div class="empty-state" style="padding:20px"><div class="empty-icon"></div>No costs for this date</div>';
         document.getElementById('costs-total').textContent = fmt(0);
         return;
     }
@@ -298,34 +298,14 @@ async function loadVendors() {
     if (!data) return;
     vendors = data;
 
-    // Populate vendor filter dropdown
     const filterVendor = document.getElementById('costs-filter-vendor');
     if (filterVendor) {
         filterVendor.innerHTML = '<option value="">All Vendors</option>' +
             vendors.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
     }
 
-    // Render vendors management list
-    const list = document.getElementById('vendors-list');
-    if (list) {
-        const ICONS = {
-            'chittagong road vendor':'🛒','miyaji vendor':'🏪','polar vendor':'❄️',
-            'arong vendor':'🥛','dncc vendor':'🏬','chairman market vendor':'🏢',
-            'runcha vendor':'🧃','a one chocolate vendor':'🍫','north end vendor':'☕',
-            'sharulia vendor':'🧇','islam plaza vendor':'🏠','local shop / vendor':'🏘️',
-            'other / one-time':'📦'
-        };
-        list.innerHTML = vendors.length ? `
-    <div style="display:flex;flex-wrap:wrap;gap:8px">
-        ${vendors.map(v => `
-            <div style="display:flex;align-items:center;gap:6px;background:var(--gray-50);padding:8px 14px;border-radius:20px;border:2px solid var(--gray-100)">
-                <span style="font-size:13px;font-weight:500">${v.name}</span>
-                <button class="btn-logout" style="font-size:12px;padding:2px 8px;margin-left:4px" onclick="deleteVendor('${v.id}')">✕</button>
-            </div>`).join('')}
-    </div>` : '<div class="empty-state" style="padding:20px">No vendors yet.</div>';
-    }
-
-    renderVendorGrid();
+    renderVendorGrid();       // costs page step-1 grid
+    renderVendorsList();      // Add/Remove page list
 }
 
 async function addVendorInline() {
@@ -337,47 +317,10 @@ async function addVendorInline() {
     await loadVendors();
 }
 
-async function deleteVendor(id) {
-    await api('/api/vendors/'+id, { method:'DELETE' });
-    toast('Vendor deleted');
-    await loadVendors();
-}
 
-async function loadCostCategories() {
-    const data = await api('/api/cost-categories');
-    if (!data) return;
-    const opts = data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-    const filterCat = document.getElementById('costs-filter-cat');
-    if (filterCat) filterCat.innerHTML = '<option value="">All Categories</option>'+opts;
-    const list = document.getElementById('cost-cats-list');
-    if (list) {
-        list.innerHTML = data.length ? `
-            <div style="display:flex;flex-wrap:wrap;gap:8px">
-                ${data.map(c=>`
-                    <div style="display:flex;align-items:center;gap:6px;background:var(--gray-50);padding:8px 14px;border-radius:20px;border:2px solid var(--gray-100)">
-                        <span class="color-dot" style="background:${c.color}"></span>
-                        <span style="font-size:13px;font-weight:500">${c.name}</span>
-                        <button class="btn-logout" style="font-size:12px;padding:2px 8px;margin-left:4px" onclick="deleteCostCat('${c.id}')">✕</button>
-                    </div>`).join('')}
-            </div>` : '<div class="empty-state" style="padding:20px">No categories yet</div>';
-    }
-}
 
-async function addCostCategory() {
-    const name  = document.getElementById('new-cost-cat').value.trim();
-    const color = document.getElementById('new-cost-cat-color').value;
-    if (!name) { toast('Enter category name','error'); return; }
-    await api('/api/cost-categories', { method:'POST', body: JSON.stringify({name, color}) });
-    document.getElementById('new-cost-cat').value = '';
-    toast('Category added!');
-    await loadCostCategories();
-}
 
-async function deleteCostCat(id) {
-    await api('/api/cost-categories/'+id, { method:'DELETE' });
-    toast('Deleted');
-    await loadCostCategories();
-}
+
 
 // Close item dropdown on outside click
     // `document.addEventListener('click', e => {

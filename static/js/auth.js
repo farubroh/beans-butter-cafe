@@ -8,33 +8,41 @@ async function doLogin() {
         document.getElementById('login-error').textContent = 'Please enter both fields';
         return;
     }
-    const res = await api('/api/login', { method:'POST', body: JSON.stringify({username:u, password:p}) });
+    const res = await api('/api/login', { method: 'POST', body: JSON.stringify({ username: u, password: p }) });
     if (res && res.success) {
-        currentUser = res.user;
-
-        // topbar (legacy ids kept for JS compat)
-        document.getElementById('user-info').textContent = res.user.username;
-        const rb = document.getElementById('role-badge');
-        rb.textContent = res.user.role;
-        rb.className = `role-badge role-${res.user.role}`;
-
-        // sidebar
-        document.getElementById('sidebar-avatar').textContent = res.user.username.slice(0, 2).toUpperCase();
-
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('app').style.display = 'flex'; // flex for sidebar layout
-
-        if (res.user.role === 'owner') {
-            document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'flex');
-        }
-        initApp();
+        localStorage.setItem('bnb_user', JSON.stringify(res.user));
+        applySession(res.user);
     } else {
         document.getElementById('login-error').textContent = res?.message || 'Login failed';
     }
 }
 
+function applySession(user) {
+    currentUser = user;
+    window.currentUserRole = user.role;
+
+    document.getElementById('user-info').textContent = user.username;
+    const rb = document.getElementById('role-badge');
+    rb.textContent = user.role;
+    rb.className = `role-badge role-${user.role}`;
+
+    document.getElementById('sidebar-avatar').textContent = user.username.slice(0, 2).toUpperCase();
+
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+
+    // Show owner-only elements only for owner
+    document.querySelectorAll('.owner-only').forEach(el => {
+        el.style.display = user.role === 'owner' ? 'flex' : 'none';
+    });
+
+    initApp();
+}
+
 function doLogout() {
+    localStorage.removeItem('bnb_user');
     currentUser = null;
+    window.currentUserRole = null;
     cart = [];
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
@@ -45,4 +53,17 @@ function doLogout() {
 
 document.getElementById('login-password').addEventListener('keydown', e => {
     if (e.key === 'Enter') doLogin();
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const saved = localStorage.getItem('bnb_user');
+    if (saved) {
+        try {
+            applySession(JSON.parse(saved));
+            return;
+        } catch {
+            localStorage.removeItem('bnb_user');
+        }
+    }
+    document.getElementById('login-screen').style.display = 'flex';
 });
