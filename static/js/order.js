@@ -190,17 +190,27 @@ function renderCart() {
         return;
     }
 
-    itemsEl.innerHTML = cart.map(item => `
+    itemsEl.innerHTML = cart.map(item => {
+        const isFree = item.product_id.endsWith('-bogo') || item.price === 0;
+        return `
         <div class="cart-item">
-            <div class="cart-item-name">${escHtml(item.name)}</div>
-            <div class="qty-ctrl">
-                <button class="qty-btn" onclick="removeFromCart('${item.product_id}')">−</button>
-                <span class="qty-num">${item.quantity}</span>
-                <button class="qty-btn" onclick="addToCart('${item.product_id}','${escHtml(item.name)}',${item.price},'')">+</button>
+            <div class="cart-item-name" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                ${escHtml(item.name)}
+                ${isFree ? '<span style="font-size:10px;font-weight:700;background:#d4edda;color:#155724;padding:1px 6px;border-radius:20px;letter-spacing:0.3px">FREE</span>' : ''}
+                ${!isFree ? `<span style="font-size:10px;color:var(--text-muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px" onclick="applyBogo('${item.product_id}','${escHtml(item.name)}')">BOGO?</span>` : ''}
             </div>
-            <span class="cart-item-price">${fmt(item.price * item.quantity)}</span>
+            <div class="qty-ctrl">
+                ${!isFree ? `
+                    <button class="qty-btn" onclick="removeFromCart('${item.product_id}')">−</button>
+                    <span class="qty-num">${item.quantity}</span>
+                    <button class="qty-btn" onclick="addToCart('${item.product_id}','${escHtml(item.name)}',${item.price},'')">+</button>
+                ` : `<span style="font-size:11px;color:var(--text-muted);padding:0 4px">×1</span>`}
+            </div>
+            <span class="cart-item-price" style="${isFree ? 'color:var(--green);font-weight:700' : ''}">
+                ${isFree ? '৳0' : fmt(item.price * item.quantity)}
+            </span>
         </div>
-    `).join('');
+    `}).join('');
 
     summaryEl.style.display = 'block';
     recalcTotal();
@@ -556,4 +566,52 @@ function showOrderProgress(show, step) {
             txt.style.fontWeight = '500';
         }
     }
+}
+
+// Render combo buttons above the product grid (in loadProductsForOrder)
+async function loadCombos() {
+    const combos = JSON.parse(localStorage.getItem('bb_combos') || '[]');
+    if (!combos.length) return;
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;padding:12px;background:var(--bg-surface2);border-radius:var(--radius);border:1px solid var(--border)';
+    wrap.innerHTML = '<div style="width:100%;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--text-muted);margin-bottom:4px">🎁 Combo Offers</div>'
+        + combos.map(c => `
+        <button class="btn btn-amber btn-sm" onclick='addComboToCart(${JSON.stringify(c)})'>
+            ${c.name} — ${fmt(c.price)}
+        </button>`).join('');
+    document.getElementById('cat-filter').before(wrap);
+}
+
+function addComboToCart(combo) {
+    combo.items.forEach(item => {
+        cart.push({
+            product_id: 'combo-' + item.name.replace(/\s/g,'') + '-' + Date.now(),
+            name: item.name,
+            price: item.type === 'free' ? 0 : item.price,
+            quantity: 1
+        });
+    });
+    renderCart();
+    const search = (document.getElementById('product-search')?.value || '').toLowerCase().trim();
+    applyFilters(search, activeCatId);
+    toast(`${combo.name} added!`, 'success');
+}
+
+function applyBogo(productId, name) {
+    const bogoId = productId + '-bogo';
+    if (cart.find(c => c.product_id === bogoId)) {
+        toast('BOGO already applied for this item', 'error');
+        return;
+    }
+    cart.push({
+        product_id: bogoId,
+        name: '[Free] ' + name,
+        price: 0,
+        quantity: 1
+    });
+    renderCart();
+    const search = (document.getElementById('product-search')?.value || '').toLowerCase().trim();
+    applyFilters(search, activeCatId);
+    toast('BOGO applied — free item added!', 'success');
 }
