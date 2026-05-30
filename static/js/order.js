@@ -434,12 +434,13 @@ function showReceipt(res, token) {
         const isFree = i.price === 0;
         return `
         <div style="padding:5px 0;border-bottom:1px dashed #e0d5c5">
-            <div style="display:flex;justify-content:space-between;font-size:13px">
+          <div style="display:flex;justify-content:space-between;font-size:20px">
                 <span>${escHtml(i.name)} × ${i.quantity}</span>
                 <span>${isFree ? '৳0' : fmt(i.price * i.quantity)}</span>
             </div>
             ${!isFree && i.quantity > 1 ? `
-            <div style="font-size:10px;color:#aaa;margin-top:2px">
+  <div style="font-size:13px;color:#aaa;margin-top:2px">
+
                 ৳${parseFloat(i.price).toLocaleString('en-IN')} × ${i.quantity}
             </div>` : ''}
         </div>
@@ -455,17 +456,17 @@ function showReceipt(res, token) {
     document.getElementById('receipt-content').innerHTML = `
     <div style="text-align:center;margin-bottom:14px">
         <div style="font-family:'Georgia',serif;font-size:22px;font-weight:700;color:#2C1810">Beans &amp; Butter</div>
-        <div style="font-size:11px;color:#888;margin-top:2px">Cafe</div>
-        <div style="font-size:10px;color:#999;margin-top:6px;line-height:1.5">
+        <div style="font-size:14px;color:#888;margin-top:2px">Cafe</div>
+        <div style="font-size:14px;color:#999;margin-top:6px;line-height:1.5">
             227, 2nd Floor, M.A. Gofur Market, Staff Quarter, Demra, Dhaka
         </div>
-        <div style="margin-top:6px;font-size:10px;color:#888">
-            <i class="ti ti-brand-instagram" style="font-size:11px;vertical-align:-1px"></i> beans_and_butter_bd &nbsp;|&nbsp;
-            <i class="ti ti-phone" style="font-size:11px;vertical-align:-1px"></i> 01343-437706
+        <div style="margin-top:6px;font-size:13px;color:#888">
+            <i class="ti ti-brand-instagram" style="font-size:14px;vertical-align:-1px"></i> beans_and_butter_bd &nbsp;|&nbsp;
+            <i class="ti ti-phone" style="font-size:14px;vertical-align:-1px"></i> 01343-437706
         </div>
-        <div style="font-size:10px;color:#aaa;margin-top:2px">beansandbutter2025@gmail.com</div>
-        <div style="margin-top:7px;padding:4px 10px;background:#faf6f0;border-radius:6px;display:inline-block;font-size:10px;color:#888">
-            <i class="ti ti-wifi" style="font-size:11px;vertical-align:-1px"></i> WiFi: Beans &amp; butter cafe-Bubblemilktea
+        <div style="font-size:14px;color:#aaa;margin-top:2px">beansandbutter2025@gmail.com</div>
+       <div style="margin-top:7px;padding:6px 12px;background:#faf6f0;border-radius:6px;display:inline-block;font-size:13px;color:#888">
+            <i class="ti ti-wifi" style="font-size:14px;vertical-align:-1px"></i> WiFi: Beans &amp; butter cafe-Bubblemilktea
         </div>
     </div>
     <hr style="border:none;border-top:1px dashed #e0d5c5;margin:10px 0">
@@ -507,8 +508,8 @@ ${paymentMethod === 'cash' ? `
             </div>
         </div>` : ''}
     </div>
-    <div style="text-align:center;margin-top:16px;font-size:11px;color:#bbb;line-height:1.6">
-        Thank you for visiting!<br><span style="font-size:10px">Come back soon</span>
+<div style="text-align:center;margin-top:6px;font-size:13px;color:#bbb;line-height:1.6">
+    Thank you for visiting!<br><span style="font-size:12px">Come back soon</span>
     </div>
 `;
 
@@ -525,30 +526,14 @@ function printReceipt() {
     const kitchenHtml  = document.getElementById('kitchen-print-area').innerHTML;
 
     printArea.innerHTML = `
-        <div style="font-family:'Georgia',serif;max-width:320px;margin:0 auto;">
-
-            <!-- Kitchen slip (top) -->
+        <!-- Kitchen slip — page 1 -->
+        <div style="font-family:'Georgia',serif;width:76mm;margin:0;padding:0;page-break-after:always;break-after:page;">
             ${kitchenHtml}
+        </div>
 
-            <!-- Cut line -->
-            <div style="
-                margin:16px 0;
-                display:flex;
-                align-items:center;
-                gap:8px;
-                color:#bbb;
-                font-size:10px;
-                font-family:sans-serif;
-                letter-spacing:0.5px;
-            ">
-                <div style="flex:1;border-top:1.5px dashed #ccc"></div>
-                ✂ cut here
-                <div style="flex:1;border-top:1.5px dashed #ccc"></div>
-            </div>
-
-            <!-- Customer receipt (bottom) -->
+        <!-- Customer receipt — page 2 -->
+        <div style="font-family:'Georgia',serif;width:76mm;margin:0;padding:0;">
             ${customerHtml}
-
         </div>
     `;
 
@@ -703,31 +688,38 @@ function showKitchenSlip(res, token) {
 
     const kitchenArea = document.getElementById('kitchen-print-area');
     kitchenArea.innerHTML = `
-        <div style="font-family:'Georgia',serif;color:#000;max-width:280px;margin:0 auto;padding:16px">
-            <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:12px">
-                <div style="font-size:16px;font-weight:700;letter-spacing:0.5px">KITCHEN ORDER</div>
-                <div style="font-size:11px;color:#555;margin-top:2px">Beans &amp; Butter</div>
-            </div>
-           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px dashed #ccc">
-                <div>
-                    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:2px">Table</div>
-                    <div style="font-size:18px;font-weight:700;line-height:1.2">${tableLabel}</div>
-                </div>
-                <div style="text-align:center">
-                    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:2px">Token</div>
-                    <div style="font-size:22px;font-weight:700;color:#000;letter-spacing:-0.5px;line-height:1">#${token}</div>
-                </div>
-                <div style="text-align:right">
-                    <div style="font-size:10px;color:#888">${res.order_number}</div>
-                    <div style="font-size:11px;color:#555">${now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</div>
-                </div>
-            </div>
-            <div style="margin-bottom:12px">${itemsHtml}</div>
-            <div style="text-align:center;margin-top:14px;font-size:10px;color:#aaa;border-top:1px dashed #ccc;padding-top:8px">
-                — kitchen copy —
-</div>
+    <div style="font-family:'Georgia',serif;color:#000;width:54mm;margin:0;padding:8px 4px">
+        <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:8px">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.5px">KITCHEN ORDER</div>
+            <div style="font-size:8px;color:#555;margin-top:1px">Beans &amp; Butter</div>
         </div>
-    `;
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed #ccc">
+            <div>
+                <div style="font-size:7px;color:#888;text-transform:uppercase;letter-spacing:0.5px">Table</div>
+                <div style="font-size:13px;font-weight:700;line-height:1.2">${tableLabel}</div>
+            </div>
+            <div style="text-align:center">
+                <div style="font-size:7px;color:#888;text-transform:uppercase;letter-spacing:0.5px">Token</div>
+                <div style="font-size:16px;font-weight:700;line-height:1">#${token}</div>
+            </div>
+            <div style="text-align:right">
+                <div style="font-size:8px;color:#888">${res.order_number}</div>
+                <div style="font-size:8px;color:#555">${now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</div>
+            </div>
+        </div>
+        <div style="margin-bottom:8px">
+            ${cart.map(i => `
+                <div style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:1px dashed #ddd">
+<span style="font-size:18px;font-weight:600">${escHtml(i.name)}</span>
+<span style="font-size:18px;font-weight:700;margin-left:8px">×${i.quantity}</span>
+                </div>
+            `).join('')}
+        </div>
+        <div style="text-align:center;margin-top:6px;font-size:7px;color:#aaa;border-top:1px dashed #ccc;padding-top:5px">
+            — kitchen copy —
+        </div>
+    </div>
+`;
 }
 
 function printKitchenSlip() {

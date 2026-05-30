@@ -834,7 +834,6 @@ body {
 
 /* ── PRINT ── */
 #print-area { display: none; }
-
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg-surface); }
@@ -1153,8 +1152,53 @@ input[readonly] { background: var(--bg-surface3) !important; color: black !impor
     overflow-y: auto;
 }
 
-
 @media print {
     body > *:not(#print-area) { display: none !important; }
     #print-area { display: block !important; }
+
+    #print-area * {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    #print-area hr {
+        border-color: #000 !important;
+        border-style: dashed !important;
+    }
+
+    #print-area input { display: none !important; }
+
+    html, body {
+        height: auto !important;
+        overflow: visible !important;
+        min-height: 0 !important;
+    }
+
+    body { height: fit-content !important; }
+
+    /* Named page rules */
+    @page kitchen {
+        size: 60mm auto;
+        margin: 2mm 3mm;
+    }
+
+    @page customer {
+        size: 210mm auto;
+        margin: 6mm 10mm;
+    }
+
+    .kitchen-page {
+        page: kitchen;
+        width: 54mm;
+        max-width: 54mm;
+    }
+
+    .customer-page {
+        page: customer;
+        width: 190mm;
+        max-width: 190mm;
+    }
 }
