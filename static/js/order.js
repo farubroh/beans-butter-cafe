@@ -6,6 +6,7 @@
 // order.js-specific state:
 let selectedMemberId  = null;
 let memberSearchTimer = null;
+let lastRes = null;
 
 // ── Bootstrap ──────────────────────────────────────────────
 async function loadProductsForOrder() {
@@ -185,7 +186,7 @@ function renderCart() {
     if (!itemsEl || !summaryEl) return;
 
     if (!cart.length) {
-        itemsEl.innerHTML   = '<div class="cart-empty">☕ Add items to order</div>';
+        itemsEl.innerHTML   = '<div class="cart-empty">Add items to order</div>';
         summaryEl.style.display = 'none';
         return;
     }
@@ -406,10 +407,13 @@ async function placeOrder() {
 
         if (res && res.success) {
             showOrderProgress(false);
-            showReceipt(res);
+            lastRes = res;
+            const token = getDailyToken();
+            showKitchenSlip(res, token);
+            showReceipt(res, token);
             clearCart();
             toast('Order placed!', 'success');
-        } else {
+        }else {
             showOrderProgress(false);
             toast(res?.message || 'Failed to place order', 'error');
         }
@@ -421,17 +425,25 @@ async function placeOrder() {
     }
 }
 // ── Receipt modal ──────────────────────────────────────────
-function showReceipt(res) {
+function showReceipt(res, token) {
     const now        = new Date();
     const tableNum   = getSelectedTable();
     const tableLabel = tableNum ? (TABLES.find(t => t.id === tableNum)?.label || tableNum) : '—';
 
-    const itemsHtml = cart.map(i => `
-        <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px dashed #e0d5c5">
-            <span>${escHtml(i.name)} × ${i.quantity}</span>
-            <span>${fmt(i.price * i.quantity)}</span>
+    const itemsHtml = cart.map(i => {
+        const isFree = i.price === 0;
+        return `
+        <div style="padding:5px 0;border-bottom:1px dashed #e0d5c5">
+            <div style="display:flex;justify-content:space-between;font-size:13px">
+                <span>${escHtml(i.name)} × ${i.quantity}</span>
+                <span>${isFree ? '৳0' : fmt(i.price * i.quantity)}</span>
+            </div>
+            ${!isFree && i.quantity > 1 ? `
+            <div style="font-size:10px;color:#aaa;margin-top:2px">
+                ৳${parseFloat(i.price).toLocaleString('en-IN')} × ${i.quantity}
+            </div>` : ''}
         </div>
-    `).join('');
+    `}).join('');
 
     const discountHtml = res.discount_amount > 0 ? `
         <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;color:#c0392b">
@@ -441,32 +453,64 @@ function showReceipt(res) {
     ` : '';
 
     document.getElementById('receipt-content').innerHTML = `
-        <div style="text-align:center;margin-bottom:16px">
-            <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#2C1810">Beans &amp; Butter</div>
-            <div style="font-size:11px;color:#888;margin-top:2px">Cafe</div>
+    <div style="text-align:center;margin-bottom:14px">
+        <div style="font-family:'Georgia',serif;font-size:22px;font-weight:700;color:#2C1810">Beans &amp; Butter</div>
+        <div style="font-size:11px;color:#888;margin-top:2px">Cafe</div>
+        <div style="font-size:10px;color:#999;margin-top:6px;line-height:1.5">
+            227, 2nd Floor, M.A. Gofur Market, Staff Quarter, Demra, Dhaka
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:#666;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #e0d5c5">
-            <span><strong>${res.order_number}</strong></span>
-            <span>${now.toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+        <div style="margin-top:6px;font-size:10px;color:#888">
+            <i class="ti ti-brand-instagram" style="font-size:11px;vertical-align:-1px"></i> beans_and_butter_bd &nbsp;|&nbsp;
+            <i class="ti ti-phone" style="font-size:11px;vertical-align:-1px"></i> 01343-437706
         </div>
-        ${tableNum ? `<div style="font-size:12px;color:#888;margin-bottom:10px">Table: <strong>${tableLabel}</strong></div>` : ''}
-        <div style="margin-bottom:12px">${itemsHtml}</div>
-        <div style="padding-top:8px">
-            <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:#555">
-                <span>Subtotal</span>
-                <span>${fmt(res.subtotal)}</span>
+        <div style="font-size:10px;color:#aaa;margin-top:2px">beansandbutter2025@gmail.com</div>
+        <div style="margin-top:7px;padding:4px 10px;background:#faf6f0;border-radius:6px;display:inline-block;font-size:10px;color:#888">
+            <i class="ti ti-wifi" style="font-size:11px;vertical-align:-1px"></i> WiFi: Beans &amp; butter cafe-Bubblemilktea
+        </div>
+    </div>
+    <hr style="border:none;border-top:1px dashed #e0d5c5;margin:10px 0">
+   <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#888;padding-bottom:8px">
+        <span style="font-weight:700;color:#2C1810;font-size:12px">${res.order_number}</span>
+        <span style="font-size:11px;font-weight:600;color:#2C1810;background:#faf6f0;border:1px solid #e0d5c5;padding:2px 10px;border-radius:20px">
+            Token: ${token}
+        </span>
+        <span>${now.toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+    </div>
+    ${tableNum ? `<div style="font-size:11px;color:#888;margin-bottom:8px">Table: <strong style="color:#2C1810">${tableLabel}</strong></div>` : ''}
+    <div style="margin-bottom:12px">${itemsHtml}</div>
+    <hr style="border:none;border-top:1px dashed #e0d5c5;margin:10px 0">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;padding:3px 0">
+        <span>Subtotal</span><span>${fmt(res.subtotal)}</span>
+    </div>
+    ${discountHtml}
+    <hr style="border:none;border-top:1.5px solid #2C1810;margin:8px 0">
+    <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:4px 0;color:#2C1810">
+        <span>Total</span><span>${fmt(res.total)}</span>
+    </div>
+    <hr style="border:none;border-top:1px dashed #e0d5c5;margin:10px 0">
+    <div style="font-size:11px;color:#888;padding:4px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
+        <span>Payment: <strong style="color:#2C1810;text-transform:capitalize">${paymentMethod}</strong></span>
+${paymentMethod === 'cash' ? `
+        <div style="margin-top:6px;display:flex;flex-direction:column;gap:4px;font-size:11px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+                <label style="color:#888;min-width:70px">Cash Given</label>
+                <div style="display:flex;align-items:center;gap:6px">
+                    <input id="cash-given" type="number" placeholder="Enter amount"
+                        style="width:100px;padding:4px 8px;border:1px solid #e0d5c5;border-radius:6px;font-size:11px;text-align:right"
+                        oninput="calcChange(${res.total})"/>
+                    <span id="cash-given-display" style="font-size:12px;font-weight:700;color:#2C1810;min-width:60px;text-align:right;display:none"></span>
+                </div>
             </div>
-            ${discountHtml}
-            <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:8px 0 0;border-top:2px solid #2C1810;margin-top:6px;color:#2C1810">
-                <span>TOTAL</span>
-                <span>${fmt(res.total)}</span>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <label style="color:#888">Return</label>
+                <span id="change-amount" style="font-size:12px;font-weight:700;color:#16A34A;min-width:60px;text-align:right">—</span>
             </div>
-        </div>
-        <div style="margin-top:14px;padding-top:12px;border-top:1px dashed #e0d5c5;display:flex;justify-content:space-between;font-size:12px;color:#666">
-            <span>Payment: <strong style="text-transform:capitalize">${paymentMethod}</strong></span>
-        </div>
-        <div style="text-align:center;margin-top:16px;font-size:11px;color:#aaa">Thank you for visiting! ☕</div>
-    `;
+        </div>` : ''}
+    </div>
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:#bbb;line-height:1.6">
+        Thank you for visiting!<br><span style="font-size:10px">Come back soon</span>
+    </div>
+`;
 
     document.getElementById('receipt-modal').style.display = 'flex';
 }
@@ -476,9 +520,38 @@ function closeReceipt() {
 }
 
 function printReceipt() {
-    const content = document.getElementById('receipt-content').innerHTML;
     const printArea = document.getElementById('print-area');
-    printArea.innerHTML = content;
+    const customerHtml = document.getElementById('receipt-content').innerHTML;
+    const kitchenHtml  = document.getElementById('kitchen-print-area').innerHTML;
+
+    printArea.innerHTML = `
+        <div style="font-family:'Georgia',serif;max-width:320px;margin:0 auto;">
+
+            <!-- Kitchen slip (top) -->
+            ${kitchenHtml}
+
+            <!-- Cut line -->
+            <div style="
+                margin:16px 0;
+                display:flex;
+                align-items:center;
+                gap:8px;
+                color:#bbb;
+                font-size:10px;
+                font-family:sans-serif;
+                letter-spacing:0.5px;
+            ">
+                <div style="flex:1;border-top:1.5px dashed #ccc"></div>
+                ✂ cut here
+                <div style="flex:1;border-top:1.5px dashed #ccc"></div>
+            </div>
+
+            <!-- Customer receipt (bottom) -->
+            ${customerHtml}
+
+        </div>
+    `;
+
     window.print();
     printArea.innerHTML = '';
 }
@@ -614,4 +687,93 @@ function applyBogo(productId, name) {
     const search = (document.getElementById('product-search')?.value || '').toLowerCase().trim();
     applyFilters(search, activeCatId);
     toast('BOGO applied — free item added!', 'success');
+}
+
+function showKitchenSlip(res, token) {
+    const tableNum   = getSelectedTable();
+    const tableLabel = tableNum ? (TABLES.find(t => t.id === tableNum)?.label || tableNum) : '—';
+    const now        = new Date();
+
+    const itemsHtml = cart.map(i => `
+        <div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px dashed #ccc;font-size:14px">
+            <span style="font-weight:600">${escHtml(i.name)}</span>
+            <span style="font-size:16px;font-weight:700;margin-left:12px">×${i.quantity}</span>
+        </div>
+    `).join('');
+
+    const kitchenArea = document.getElementById('kitchen-print-area');
+    kitchenArea.innerHTML = `
+        <div style="font-family:'Georgia',serif;color:#000;max-width:280px;margin:0 auto;padding:16px">
+            <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:12px">
+                <div style="font-size:16px;font-weight:700;letter-spacing:0.5px">KITCHEN ORDER</div>
+                <div style="font-size:11px;color:#555;margin-top:2px">Beans &amp; Butter</div>
+            </div>
+           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px dashed #ccc">
+                <div>
+                    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:2px">Table</div>
+                    <div style="font-size:18px;font-weight:700;line-height:1.2">${tableLabel}</div>
+                </div>
+                <div style="text-align:center">
+                    <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:2px">Token</div>
+                    <div style="font-size:22px;font-weight:700;color:#000;letter-spacing:-0.5px;line-height:1">#${token}</div>
+                </div>
+                <div style="text-align:right">
+                    <div style="font-size:10px;color:#888">${res.order_number}</div>
+                    <div style="font-size:11px;color:#555">${now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</div>
+                </div>
+            </div>
+            <div style="margin-bottom:12px">${itemsHtml}</div>
+            <div style="text-align:center;margin-top:14px;font-size:10px;color:#aaa;border-top:1px dashed #ccc;padding-top:8px">
+                — kitchen copy —
+</div>
+        </div>
+    `;
+}
+
+function printKitchenSlip() {
+    document.body.classList.add('print-kitchen');
+    window.print();
+    document.body.classList.remove('print-kitchen');
+}
+
+function calcChange(total) {
+    const input   = document.getElementById('cash-given');
+    const given   = parseFloat(input?.value) || 0;
+    const changeEl = document.getElementById('change-amount');
+    const givenDisplay = document.getElementById('cash-given-display');
+    if (!changeEl) return;
+
+    if (given > 0) {
+        // Show given amount as text alongside the input
+        if (givenDisplay) {
+            givenDisplay.textContent = '৳' + given.toLocaleString('en-IN');
+            givenDisplay.style.display = 'inline';
+        }
+        if (given >= total) {
+            changeEl.textContent = '৳' + (given - total).toLocaleString('en-IN');
+            changeEl.style.color = '#16A34A';
+        } else {
+            changeEl.textContent = 'Short ৳' + (total - given).toLocaleString('en-IN');
+            changeEl.style.color = '#DC2626';
+        }
+    } else {
+        if (givenDisplay) { givenDisplay.style.display = 'none'; }
+        changeEl.textContent = '—';
+        changeEl.style.color = '#16A34A';
+    }
+}
+function getDailyToken() {
+    const today = new Date().toISOString().slice(0, 10); // "2026-05-30"
+    const stored = JSON.parse(localStorage.getItem('bb_token') || '{}');
+
+    if (stored.date !== today) {
+        // New day — reset to 11
+        const newToken = { date: today, counter: 11 };
+        localStorage.setItem('bb_token', JSON.stringify(newToken));
+        return 11;
+    } else {
+        stored.counter++;
+        localStorage.setItem('bb_token', JSON.stringify(stored));
+        return stored.counter;
+    }
 }

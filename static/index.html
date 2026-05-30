@@ -518,19 +518,23 @@
 <div class="modal-overlay" id="receipt-modal">
     <div class="modal">
         <div class="modal-header">
-            <span class="modal-title">🧾 Order Receipt</span>
+            <span class="modal-title">Order Receipt</span>
             <button class="close-btn" onclick="closeReceipt()">✕</button>
         </div>
         <div class="modal-body">
             <div class="receipt" id="receipt-content"></div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" style="flex:1" onclick="printReceipt()">🖨️ Print</button>
+            <button class="btn btn-primary" style="flex:1" onclick="printReceipt()">
+                <i class="ti ti-printer" style="font-size:15px;vertical-align:-2px" aria-hidden="true"></i>
+                Print
+            </button>
             <button class="btn btn-outline" onclick="closeReceipt()">Close</button>
         </div>
     </div>
 </div>
 
+<div id="kitchen-print-area" style="display:none"></div>
 <div id="print-area"></div>
 <div id="toast"></div>
 
