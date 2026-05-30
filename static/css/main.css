@@ -833,10 +833,6 @@ body {
 #toast.error   { border-left-color: var(--red); background: var(--bg-surface2); }
 
 /* ── PRINT ── */
-@media print {
-    body > *:not(#print-area) { display: none !important; }
-    #print-area { display: block !important; }
-}
 #print-area { display: none; }
 
 /* ── SCROLLBAR ── */
@@ -1131,3 +1127,34 @@ input[readonly] { background: var(--bg-surface3) !important; color: black !impor
 }
 .ar-tab:hover { border-color: var(--accent); color: var(--text); }
 .ar-tab.active { background: #1B2E22; color: white; border-color: #1B2E22; font-weight: 600; }
+
+/* Fix order page to full height with independent scrolling */
+#page-order {
+    height: calc(100vh - 60px); /* 60px = topbar height, adjust if different */
+    overflow: hidden;
+    padding: 0;
+}
+
+.order-layout {
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Products side scrolls independently */
+.order-layout > div:first-child {
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+/* Cart panel scrolls independently */
+.cart-panel {
+    height: 100%;
+    overflow-y: auto;
+}
+
+
+@media print {
+    body > *:not(#print-area) { display: none !important; }
+    #print-area { display: block !important; }
+}

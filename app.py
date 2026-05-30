@@ -178,6 +178,7 @@ def get_orders():
     all_orders = sb_get('orders',
                         f"created_at=gte.{utc_start}"
                         f"&created_at=lte.{utc_end}"
+                        f"&status=neq.cancelled"
                         f"&order=created_at.desc")
 
     filtered = [o for o in (all_orders or [])
@@ -189,6 +190,25 @@ def get_orders():
 @app.route('/api/orders/<order_id>/checkout', methods=['POST'])
 def checkout_order(order_id):
     sb_patch('orders', order_id, {'left_at': datetime.now(DHAKA).isoformat()})
+    return jsonify({'success': True})
+
+@app.route('/api/orders/<order_id>', methods=['GET'])
+def get_order(order_id):
+    orders = sb_get('orders', f"id=eq.{order_id}&select=*")
+    if not orders or len(orders) == 0:
+        return jsonify({'error': 'Order not found'}), 404
+    order = orders[0]
+
+    # Fetch order items with product name
+    items = sb_get('order_items',
+                   f"order_id=eq.{order_id}&select=*,products(name)")
+    order['order_items'] = items or []
+    return jsonify(order)
+
+
+@app.route('/api/orders/<order_id>/cancel', methods=['POST'])
+def cancel_order(order_id):
+    sb_patch('orders', order_id, {'status': 'cancelled'})
     return jsonify({'success': True})
 
 @app.route('/api/members', methods=['GET'])
