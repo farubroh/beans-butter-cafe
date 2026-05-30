@@ -187,10 +187,14 @@ async function viewOrderDetails(orderId) {
 }
 
 function printOrderDetail() {
-    const content = document.getElementById('order-detail-modal')?.querySelector('div > div');
-    if (!content) return;
+    const modalContent = document.getElementById('order-detail-modal')?.querySelector('div > div');
+    if (!modalContent) return;
     const printArea = document.getElementById('print-area');
-    printArea.innerHTML = `<div style="font-family:'Georgia',serif;max-width:380px;margin:0 auto">${content.innerHTML}</div>`;
+    printArea.innerHTML = `
+        <div style="font-family:'Georgia',serif;width:76mm;margin:0;padding:0;">
+            ${modalContent.innerHTML}
+        </div>
+    `;
     window.print();
     printArea.innerHTML = '';
 }
